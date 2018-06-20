@@ -3,7 +3,7 @@
 
 Formal verification of the GraphBLAS C API implementation by [Tim Davis](http://faculty.cse.tamu.edu/davis/welcome.html) using [Frama-C](https://frama-c.com/)/[WP](https://frama-c.com/wp.html) and [VeriFast](https://github.com/verifast/verifast) (potentially). Modified versions of GraphBLAS 2.0.1 (for verification) are contained within this repository as well as an unmodified version for comparison. 
 
-For those interested, the most recent version of GraphBLAS is packaged with SuiteSparse and can be downloaded from [here](http://faculty.cse.tamu.edu/davis/suitesparse.html).
+For those interested, the most recent version of GraphBLAS is packaged with SuiteSparse and can be downloaded [here](http://faculty.cse.tamu.edu/davis/suitesparse.html).
 
 # Acknowledgments
 **Mentors**
