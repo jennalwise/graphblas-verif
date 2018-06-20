@@ -5,6 +5,9 @@ Formal verification of the GraphBLAS C API implementation by [Tim Davis](http://
 
 For those interested, the most recent version of GraphBLAS is packaged with SuiteSparse and can be downloaded [here](http://faculty.cse.tamu.edu/davis/suitesparse.html).
 
+## Documentation
+For more information and documentation, please visit the [Wiki](https://github.com/jennalwise/graphblas-verif/wiki).
+
 # Acknowledgments
 **Mentors**
 * Manoj Kumar, IBM Research
