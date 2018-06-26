@@ -5,6 +5,11 @@
 // SuiteSparse:GraphBLAS, Timothy A. Davis, (c) 2017-2018, All Rights Reserved.
 // http://suitesparse.com   See GraphBLAS/Doc/License.txt for license.
 
+// Modified by Jenna Wise.
+// *** JENNA CHANGE 6/22/18 ***
+// Commented out the use of openmp #pragmas
+// Frama-C does not support openmp #pragmas
+
 //------------------------------------------------------------------------------
 
 // A wrapper for FREE.  If p is NULL on input, it is not freed.
@@ -27,7 +32,7 @@ void GB_free_memory
         nitems = IMAX (1, nitems) ;
         int nmalloc ;
 
-        #pragma omp critical (GB_memory)
+        // #pragma omp critical (GB_memory)
         {
             nmalloc = --GB_Global.nmalloc ;
             GB_Global.inuse -= nitems * size_of_item ;

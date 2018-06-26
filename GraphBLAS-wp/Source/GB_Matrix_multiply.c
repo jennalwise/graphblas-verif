@@ -5,16 +5,22 @@
 // SuiteSparse:GraphBLAS, Timothy A. Davis, (c) 2017-2018, All Rights Reserved.
 // http://suitesparse.com   See GraphBLAS/Doc/License.txt for license.
 
+// Modified by Jenna Wise.
+// *** JENNA CHANGE 6/22/18 ***
+// Had to change all of the _Generic macro calls to their proper typed versions
+// GrB_free uses _Generic
+// Frama-C does not support _Generic
+
 //------------------------------------------------------------------------------
 
 // C = A*B, A'*B, A*B', or A'*B' : both symbolic and numeric.
 // Not user-callable.  See GrB_mxm instead.
 
 #define FREE_ALL        \
-    GrB_free (&AT) ;    \
-    GrB_free (&BT) ;    \
-    GrB_free (&MT) ;    \
-    GrB_free (&CT) ;
+    GrB_Matrix_free (&AT) ;    \
+    GrB_Matrix_free (&BT) ;    \
+    GrB_Matrix_free (&MT) ;    \
+    GrB_Matrix_free (&CT) ;
 
 #define OK(method)                  \
     info = method ;                 \
@@ -215,7 +221,7 @@ GrB_Info GB_Matrix_multiply         // C = A*B, A'*B, A*B', or A'*B'
                 OK (GB_AxB_symbolic (CT, NULL, BT, A, false, false, false)) ;
                 OK (GB_AxB_numeric  (CT, NULL, BT, A, semiring, !flipxy, flo)) ;
                 ASSERT (!ZOMBIES (CT)) ;
-                GrB_free (&BT) ;
+                GrB_Matrix_free (&BT) ;
 
                 // C = CT', no typecasting, no operator
                 OK (GB_Matrix_transpose (C, CT, NULL, true)) ;
@@ -285,8 +291,8 @@ GrB_Info GB_Matrix_multiply         // C = A*B, A'*B, A*B', or A'*B'
                 OK (GB_AxB_numeric  (CT, M, B, AT, semiring, !flipxy, flo)) ;
                 did_mask = (M != NULL) ;
                 if (did_mask) ASSERT (ZOMBIES_OK (CT)) ;
-                GrB_free (&MT) ;
-                GrB_free (&AT) ;
+                GrB_Matrix_free (&MT) ;
+                GrB_Matrix_free (&AT) ;
 
                 // C = CT', no typecasting, no operator
                 APPLY_PENDING_UPDATES (CT) ;
@@ -347,7 +353,7 @@ GrB_Info GB_Matrix_multiply         // C = A*B, A'*B, A*B', or A'*B'
                 OK (GB_AxB_numeric  (CT, MT, B, A, semiring, !flipxy, false)) ;
                 did_mask = (MT != NULL) ;
                 if (did_mask) ASSERT (ZOMBIES_OK (CT)) ;
-                GrB_free (&MT) ;
+                GrB_Matrix_free (&MT) ;
                 APPLY_PENDING_UPDATES (CT) ;
             }
 

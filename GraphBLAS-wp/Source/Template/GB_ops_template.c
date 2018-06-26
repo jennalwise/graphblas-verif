@@ -5,6 +5,15 @@
 // SuiteSparse:GraphBLAS, Timothy A. Davis, (c) 2017-2018, All Rights Reserved.
 // http://suitesparse.com   See GraphBLAS/Doc/License.txt for license.
 
+// *** JENNA CHANGE 6/25/18 ***
+// Changed use of CAST macro definition to match new CAST macro definition
+// Changed CAST_FUNCTION macro definition to include the type codes for new CAST macro def
+// Included proper type codes for calls to CAST_FUNCTION
+// Added undef for TYPE_code def
+// Changed use of IDIV macro definition to match new definition
+//      --used TYPE_code since types of x and y are both TYPE (sometimes z too)
+// Changed use of IMINV macro definition to match new definition
+
 //------------------------------------------------------------------------------
 
 // This file is #include'd many times in GB_builtin.c to define the built-in
@@ -47,12 +56,12 @@ void GB (MINV_f)     (Z_X_ARGS) { Z = true ; }  // see comments in Source/GB.h
 // unsigned integer
 void GB (AINV_f)     (Z_X_ARGS) { Z = -X ; }    // modulo wrap is intentional
 void GB (ABS_f)      (Z_X_ARGS) { Z = X ; }
-void GB (MINV_f)     (Z_X_ARGS) { Z = IMINV (X) ; }
+void GB (MINV_f)     (Z_X_ARGS) { Z = IMINV (X,TYPE_code) ; }
 #else
 // signed integer
 void GB (AINV_f)     (Z_X_ARGS) { Z = -X ; }
 void GB (ABS_f)      (Z_X_ARGS) { Z = IABS (X) ; }
-void GB (MINV_f)     (Z_X_ARGS) { Z = IMINV (X) ; }
+void GB (MINV_f)     (Z_X_ARGS) { Z = IMINV (X,TYPE_code) ; }
 #endif
 #endif
 #endif
@@ -82,7 +91,7 @@ void GB (DIV_f)    (Z_X_Y_ARGS) { Z = X / Y ; } // floating-point division
 #ifdef BOOLEAN
 void GB (DIV_f)    (Z_X_Y_ARGS) { Z = X ; }     // see comments in Source/GB.h
 #else
-void GB (DIV_f)    (Z_X_Y_ARGS) { Z = IDIV (X,Y) ; }    // int* and uint* only
+void GB (DIV_f)    (Z_X_Y_ARGS) { Z = IDIV (X,Y,TYPE_code) ; }    // int* and uint* only
 #endif
 #endif
 
@@ -170,7 +179,7 @@ BINARY_BOOL (GrB_, LE, "le") ;
 // The s parameter is not used in these functions.  It is present because one
 // function returned by GB_cast_factory requires it (GB_copy_user_user).
 
-#define CAST_FUNCTION(xtype)                                                \
+#define CAST_FUNCTION(xtype,xcode)                                          \
     (                                                                       \
         void *z,            /* typecasted output, of type ztype */          \
         const void *x,      /* input value to typecast, of type xtype */    \
@@ -178,26 +187,27 @@ BINARY_BOOL (GrB_, LE, "le") ;
     )                                                                       \
     {                                                                       \
         /* the types of z and x are known at compile time */                \
-        CAST ((*((TYPE *) z)) , (*((const xtype *) x))) ;                   \
+        CAST ((*((TYPE *) z)) , (*((const xtype *) x)) , TYPE_code , xcode) ;\
     }
 
-void CAST_NAME (bool    ) CAST_FUNCTION (bool    )
-void CAST_NAME (int8_t  ) CAST_FUNCTION (int8_t  )
-void CAST_NAME (uint8_t ) CAST_FUNCTION (uint8_t )
-void CAST_NAME (int16_t ) CAST_FUNCTION (int16_t )
-void CAST_NAME (uint16_t) CAST_FUNCTION (uint16_t)
-void CAST_NAME (int32_t ) CAST_FUNCTION (int32_t )
-void CAST_NAME (uint32_t) CAST_FUNCTION (uint32_t)
-void CAST_NAME (int64_t ) CAST_FUNCTION (int64_t )
-void CAST_NAME (uint64_t) CAST_FUNCTION (uint64_t)
-void CAST_NAME (float   ) CAST_FUNCTION (float   )
-void CAST_NAME (double  ) CAST_FUNCTION (double  )
+void CAST_NAME (bool    ) CAST_FUNCTION (bool     , GB_BOOL_code  )
+void CAST_NAME (int8_t  ) CAST_FUNCTION (int8_t   , GB_INT8_code  )
+void CAST_NAME (uint8_t ) CAST_FUNCTION (uint8_t  , GB_UINT8_code )
+void CAST_NAME (int16_t ) CAST_FUNCTION (int16_t  , GB_INT16_code )
+void CAST_NAME (uint16_t) CAST_FUNCTION (uint16_t , GB_UINT16_code)
+void CAST_NAME (int32_t ) CAST_FUNCTION (int32_t  , GB_INT32_code )
+void CAST_NAME (uint32_t) CAST_FUNCTION (uint32_t , GB_UINT32_code)
+void CAST_NAME (int64_t ) CAST_FUNCTION (int64_t  , GB_INT64_code )
+void CAST_NAME (uint64_t) CAST_FUNCTION (uint64_t , GB_UINT64_code)
+void CAST_NAME (float   ) CAST_FUNCTION (float    , GB_FP32_code  )
+void CAST_NAME (double  ) CAST_FUNCTION (double   , GB_FP64_code  )
 
 #undef X
 #undef Y
 #undef Z
 #undef Zbool
 #undef TYPE
+#undef TYPE_code
 #undef GB
 #undef GRB_NAME
 #undef CAST_NAME

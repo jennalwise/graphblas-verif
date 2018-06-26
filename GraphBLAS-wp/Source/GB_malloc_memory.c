@@ -5,6 +5,11 @@
 // SuiteSparse:GraphBLAS, Timothy A. Davis, (c) 2017-2018, All Rights Reserved.
 // http://suitesparse.com   See GraphBLAS/Doc/License.txt for license.
 
+// Modified by Jenna Wise.
+// *** JENNA CHANGE 6/23/18 ***
+// Commented out the use of openmp #pragmas
+// Frama-C does not support openmp #pragmas
+
 //------------------------------------------------------------------------------
 
 // A wrapper for MALLOC.  Space is not initialized.
@@ -53,7 +58,7 @@ void *GB_malloc_memory      // pointer to allocated block of memory
         if (GB_Global.malloc_debug)
         {
             // brutal malloc debug; pretend to fail if the count <= 0
-            #pragma omp critical (GB_memory)
+            // #pragma omp critical (GB_memory)
             {
                 pretend_to_fail = (GB_Global.malloc_debug_count-- <= 0) ;
             }
@@ -71,7 +76,7 @@ void *GB_malloc_memory      // pointer to allocated block of memory
         if (p != NULL)
         {
 
-            #pragma omp critical (GB_memory)
+            // #pragma omp critical (GB_memory)
             {
                 nmalloc = ++GB_Global.nmalloc ;
                 GB_Global.inuse += nitems * size_of_item ;

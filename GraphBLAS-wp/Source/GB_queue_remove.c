@@ -5,6 +5,11 @@
 // SuiteSparse:GraphBLAS, Timothy A. Davis, (c) 2017-2018, All Rights Reserved.
 // http://suitesparse.com   See GraphBLAS/Doc/License.txt for license.
 
+// Modified by Jenna Wise.
+// *** JENNA CHANGE 6/23/18 ***
+// Commented out the use of openmp #pragmas
+// Frama-C does not support openmp #pragmas
+
 //------------------------------------------------------------------------------
 
 #include "GB.h"
@@ -28,7 +33,7 @@ void GB_queue_remove            // remove matrix from queue
     if (A->enqueued)
     {
         // remove the matrix from the queue
-        #pragma omp critical (GB_queue)
+        // #pragma omp critical (GB_queue)
         {
             // check again to be safe, and remove A from the queue
             if (A->enqueued)

@@ -5,6 +5,13 @@
 // SuiteSparse:GraphBLAS, Timothy A. Davis, (c) 2017-2018, All Rights Reserved.
 // http://suitesparse.com   See GraphBLAS/Doc/License.txt for license.
 
+// *** JENNA CHANGE 6/25/18 ***
+// Changed WORKER macro definition to include the type codes
+// Other files need the type codes in WORKER def for the new CAST macro
+// Therefore calls to WORKER in GB_2type_template.c require type codes which affects this file
+// This one doesn't use the type codes like the others, but needs them for GB_2type_template.c
+// WORKER calls
+
 //------------------------------------------------------------------------------
 
 // return a pointer to a function f(z,x,s) that copies its input x into its
@@ -33,7 +40,7 @@ GB_cast_function GB_cast_factory   // returns pointer to function to cast x to z
     //--------------------------------------------------------------------------
 
     // the worker selects a typecast function and returns it to the caller
-    #define WORKER(ztype,xtype) return (&GB_cast_ ## ztype ## _ ## xtype) ;
+    #define WORKER(ztype,xtype,zcode,xcode) return (&GB_cast_ ## ztype ## _ ## xtype) ;
 
     //--------------------------------------------------------------------------
     // launch the switch factory

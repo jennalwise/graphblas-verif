@@ -5,6 +5,28 @@
 // SuiteSparse:GraphBLAS, Timothy A. Davis, (c) 2017-2018, All Rights Reserved.
 // http://suitesparse.com   See GraphBLAS/Doc/License.txt for license.
 
+// Modified by Jenna Wise.
+// *** JENNA CHANGE 6/21/18 ***
+// Commented out the use of _Thread_local
+// Frama-C does not support _Thread_local
+// Only verifying sequential properties, so this is a non-issue
+// Changed NAN to nan("") in FMIN and FMAX since NAN is not supported by Frama-C's math.h file
+// Added isnan macro definition to end of this file following the IEEE 754 Standard -- Frama-C doesn't have
+// isnan in math.h
+// *** JENNA CHANGE 6/25/18 ***
+// Rewrote IS_INTEGER, IS_FLOAT, PLUS_INF, MINUS_INF to remove the use of _Generic
+// Removed dependence on FP built-ins used in CAST macro definition
+// Added extra macro to where GB_ops_template.h is included to carry built-in type code through to GB_ops_template.c
+// Fixed use of IS_INTEGER, IS_FLOAT, PLUS_INF, MINUS_INF, IS_SIGNED in
+//      PLUS_INF,MINUS_INF -> SIGNED_INTEGER_DIVISION_BY_ZERO -> SIGNED_INTEGER_DIVISION -> IDIV
+//      PLUS_INF -> UNSIGNED_INTEGER_DIVISION_BY_ZERO -> UNSIGNED_INTEGER_DIVISION ->IDIV
+//      IS_SIGNED -> IDIV
+//      IS_INTEGER,IS_FLOAT,PLUS_INF,MINUS_INF -> CAST
+//      PLUS_INF -> IMINV
+// All contained completely within GB.h except for IMINV and IDIV
+// IDIV also in GB_ops_template.c only -- all fixed
+// IMINV also in GB_ops_template.c and GB_transpose_op.c only -- all fixed
+
 //------------------------------------------------------------------------------
 
 // These defintions are not visible to the user.  They are used only inside
@@ -529,56 +551,67 @@ GB_Opcode ;
 #define NAME ((name != NULL) ? name : "")
 
 #define TYPE            bool
+#define TYPE_code       GB_BOOL_code
 #define GB(x)           GB_ ## x ## _BOOL
 #define CAST_NAME(x)    GB_cast_bool_ ## x
 #include "GB_ops_template.h"
 
 #define TYPE            int8_t
+#define TYPE_code       GB_INT8_code
 #define GB(x)           GB_ ## x ## _INT8
 #define CAST_NAME(x)    GB_cast_int8_t_ ## x
 #include "GB_ops_template.h"
 
 #define TYPE            uint8_t
+#define TYPE_code       GB_UINT8_code
 #define GB(x)           GB_ ## x ## _UINT8
 #define CAST_NAME(x)    GB_cast_uint8_t_ ## x
 #include "GB_ops_template.h"
 
 #define TYPE            int16_t
+#define TYPE_code       GB_INT16_code
 #define GB(x)           GB_ ## x ## _INT16
 #define CAST_NAME(x)    GB_cast_int16_t_ ## x
 #include "GB_ops_template.h"
 
 #define TYPE            uint16_t
+#define TYPE_code       GB_UINT16_code
 #define GB(x)           GB_ ## x ## _UINT16
 #define CAST_NAME(x)    GB_cast_uint16_t_ ## x
 #include "GB_ops_template.h"
 
 #define TYPE            int32_t
+#define TYPE_code       GB_INT32_code
 #define GB(x)           GB_ ## x ## _INT32
 #define CAST_NAME(x)    GB_cast_int32_t_ ## x
 #include "GB_ops_template.h"
 
 #define TYPE            uint32_t
+#define TYPE_code       GB_UINT32_code
 #define GB(x)           GB_ ## x ## _UINT32
 #define CAST_NAME(x)    GB_cast_uint32_t_ ## x
 #include "GB_ops_template.h"
 
 #define TYPE            int64_t
+#define TYPE_code       GB_INT64_code
 #define GB(x)           GB_ ## x ## _INT64
 #define CAST_NAME(x)    GB_cast_int64_t_ ## x
 #include "GB_ops_template.h"
 
 #define TYPE            uint64_t
+#define TYPE_code       GB_UINT64_code
 #define GB(x)           GB_ ## x ## _UINT64
 #define CAST_NAME(x)    GB_cast_uint64_t_ ## x
 #include "GB_ops_template.h"
 
 #define TYPE            float
+#define TYPE_code       GB_FP32_code
 #define GB(x)           GB_ ## x ## _FP32
 #define CAST_NAME(x)    GB_cast_float_ ## x
 #include "GB_ops_template.h"
 
 #define TYPE            double
+#define TYPE_code       GB_FP64_code
 #define GB(x)           GB_ ## x ## _FP64
 #define CAST_NAME(x)    GB_cast_double_ ## x
 #include "GB_ops_template.h"
@@ -1649,7 +1682,8 @@ typedef struct
 }
 GB_thread_local_struct ;
 
-_Thread_local extern GB_thread_local_struct GB_thread_local ;
+//_Thread_local
+extern GB_thread_local_struct GB_thread_local ;
 
 //------------------------------------------------------------------------------
 // random number generator
@@ -1947,7 +1981,7 @@ void GB_Flag_free ( ) ;             // free the Flag array
 //------------------------------------------------------------------------------
 
 // returns the largest possible value for a given type
-#define PLUS_INF(type)            \
+/*#define PLUS_INF(type)            \
     _Generic                      \
     (                             \
         (type),                   \
@@ -1963,9 +1997,38 @@ void GB_Flag_free ( ) ;             // free the Flag array
         float    : INFINITY     , \
         double   : INFINITY       \
     )
+*/
+
+// didn't use switch so can return proper max
+// HUGE_VAL and HUGE_VALF are equiv to INFINITY and are supported by Frama-C math.h
+#define PLUS_INF(type)                \
+    ( (type) == GB_BOOL_code      ?   \
+        true                      :   \
+    ( (type) == GB_INT8_code      ?   \
+        INT8_MAX                  :   \
+    ( (type) == GB_UINT8_code     ?   \
+        UINT8_MAX                 :   \
+    ( (type) == GB_INT16_code     ?   \
+        INT16_MAX                 :   \
+    ( (type) == GB_UINT16_code    ?   \
+        UINT16_MAX                :   \
+    ( (type) == GB_INT32_code     ?   \
+        INT32_MAX                 :   \
+    ( (type) == GB_UINT32_code    ?   \
+        UINT32_MAX                :   \
+    ( (type) == GB_INT64_code     ?   \
+        INT64_MAX                 :   \
+    ( (type) == GB_UINT64_code    ?   \
+        UINT64_MAX                :   \
+    ( (type) == GB_FP32_code      ?   \
+        HUGE_VALF                 :   \
+    ( (type) == GB_FP64_code      ?   \
+        HUGE_VAL                  :   \
+        0                             \
+    )))))))))) )
 
 // returns the smallest possible value for a given type
-#define MINUS_INF(type)           \
+/*#define MINUS_INF(type)           \
     _Generic                      \
     (                             \
         (type),                   \
@@ -1981,9 +2044,39 @@ void GB_Flag_free ( ) ;             // free the Flag array
         float    : -INFINITY    , \
         double   : -INFINITY      \
     )
+*/
+
+// didn't use switch so can return proper min
+// HUGE_VAL and HUGE_VALF are equiv to INFINITY and are supported by Frama-C math.h
+#define MINUS_INF(type)               \
+    ( (type) == GB_BOOL_code      ?   \
+        false                     :   \
+    ( (type) == GB_INT8_code      ?   \
+        INT8_MIN                  :   \
+    ( (type) == GB_UINT8_code     ?   \
+        0                         :   \
+    ( (type) == GB_INT16_code     ?   \
+        INT16_MIN                 :   \
+    ( (type) == GB_UINT16_code    ?   \
+        0                         :   \
+    ( (type) == GB_INT32_code     ?   \
+        INT32_MIN                 :   \
+    ( (type) == GB_UINT32_code    ?   \
+        0                         :   \
+    ( (type) == GB_INT64_code     ?   \
+        INT64_MIN                 :   \
+    ( (type) == GB_UINT64_code    ?   \
+        0                         :   \
+    ( (type) == GB_FP32_code      ?   \
+        -HUGE_VALF                :   \
+    ( (type) == GB_FP64_code      ?   \
+        -HUGE_VAL                 :   \
+        0                             \
+    )))))))))) )
+
 
 // true if the type is signed
-#define IS_SIGNED(type)           \
+/*#define IS_SIGNED(type)           \
     _Generic                      \
     (                             \
         (type),                   \
@@ -1999,9 +2092,37 @@ void GB_Flag_free ( ) ;             // free the Flag array
         float    : true         , \
         double   : true           \
     )
+*/
+
+// didn't use switch so can return proper bool
+#define IS_SIGNED(type)               \
+    ( (type) == GB_BOOL_code      ?   \
+        false                     :   \
+    ( (type) == GB_INT8_code      ?   \
+        true                      :   \
+    ( (type) == GB_UINT8_code     ?   \
+        false                     :   \
+    ( (type) == GB_INT16_code     ?   \
+        true                      :   \
+    ( (type) == GB_UINT16_code    ?   \
+        false                     :   \
+    ( (type) == GB_INT32_code     ?   \
+        true                      :   \
+    ( (type) == GB_UINT32_code    ?   \
+        false                     :   \
+    ( (type) == GB_INT64_code     ?   \
+        true                      :   \
+    ( (type) == GB_UINT64_code    ?   \
+        false                     :   \
+    ( (type) == GB_FP32_code      ?   \
+        true                      :   \
+    ( (type) == GB_FP64_code      ?   \
+        true                      :   \
+        false                         \
+    )))))))))) )
 
 // true if the type is integer (boolean is not integer)
-#define IS_INTEGER(type)          \
+/*#define IS_INTEGER(type)          \
     _Generic                      \
     (                             \
         (type),                   \
@@ -2017,6 +2138,26 @@ void GB_Flag_free ( ) ;             // free the Flag array
         float    : false        , \
         double   : false          \
     )
+*/
+
+// didn't use switch so can return bool
+#define IS_INTEGER(type)              \
+    ( (type) == GB_BOOL_code      ?   \
+        false                     :   \
+    ( (type) == GB_INT8_code      ||  \
+      (type) == GB_UINT8_code     ||  \
+      (type) == GB_INT16_code     ||  \
+      (type) == GB_UINT16_code    ||  \
+      (type) == GB_INT32_code     ||  \
+      (type) == GB_UINT32_code    ||  \
+      (type) == GB_INT64_code     ||  \
+      (type) == GB_UINT64_code    ?   \
+        true                      :   \
+    ( (type) == GB_FP32_code      ||  \
+      (type) == GB_FP64_code      ?   \
+        false                     :   \
+        false                         \
+    )) )
 
 // true if the type is boolean
 #define IS_BOOLEAN(type)          \
@@ -2037,7 +2178,7 @@ void GB_Flag_free ( ) ;             // free the Flag array
     )
 
 // true if the type is float or double
-#define IS_FLOAT(type)            \
+/*#define IS_FLOAT(type)            \
     _Generic                      \
     (                             \
         (type),                   \
@@ -2053,6 +2194,26 @@ void GB_Flag_free ( ) ;             // free the Flag array
         float    : true         , \
         double   : true           \
     )
+*/
+
+// didn't use switch so can return bool
+#define IS_FLOAT(type)                \
+    ( (type) == GB_BOOL_code      ?   \
+        false                     :   \
+    ( (type) == GB_INT8_code      ||  \
+      (type) == GB_UINT8_code     ||  \
+      (type) == GB_INT16_code     ||  \
+      (type) == GB_UINT16_code    ||  \
+      (type) == GB_INT32_code     ||  \
+      (type) == GB_UINT32_code    ||  \
+      (type) == GB_INT64_code     ||  \
+      (type) == GB_UINT64_code    ?   \
+        false                     :   \
+    ( (type) == GB_FP32_code      ||  \
+      (type) == GB_FP64_code      ?   \
+        true                      :   \
+        false                         \
+    )) )
 
 //------------------------------------------------------------------------------
 // division by zero
@@ -2070,7 +2231,7 @@ void GB_Flag_free ( ) ;             // free the Flag array
 // grep "integer division"
 
 // signed integer division x/zero: special cases for 0/0, -(neg)/0, (pos)/0
-#define SIGNED_INTEGER_DIVISION_BY_ZERO(x)                                  \
+#define SIGNED_INTEGER_DIVISION_BY_ZERO(x,xtype)                            \
 (                                                                           \
     ((x) == 0) ?                                                            \
     (                                                                       \
@@ -2083,18 +2244,18 @@ void GB_Flag_free ( ) ;             // free the Flag array
         ((x) < 0) ?                                                         \
         (                                                                   \
             /* x is negative: x/0 gives '-Inf' */                           \
-            MINUS_INF (x)                                                   \
+            MINUS_INF (xtype)                                               \
         )                                                                   \
         :                                                                   \
         (                                                                   \
             /* x is positive: x/0 gives '+Inf' */                           \
-            PLUS_INF (x)                                                    \
+            PLUS_INF (xtype)                                                \
         )                                                                   \
     )                                                                       \
-)
+ )
 
 // signed integer division x/y: special cases for y=-1 and y=0
-#define SIGNED_INTEGER_DIVISION(x,y)                                        \
+#define SIGNED_INTEGER_DIVISION(x,y,xtype)                                  \
 (                                                                           \
     ((y) == -1) ?                                                           \
     (                                                                       \
@@ -2106,7 +2267,7 @@ void GB_Flag_free ( ) ;             // free the Flag array
         ((y) == 0) ?                                                        \
         (                                                                   \
             /* x/0 */                                                       \
-            SIGNED_INTEGER_DIVISION_BY_ZERO (x)                             \
+            SIGNED_INTEGER_DIVISION_BY_ZERO (x,xtype)                       \
         )                                                                   \
         :                                                                   \
         (                                                                   \
@@ -2117,7 +2278,7 @@ void GB_Flag_free ( ) ;             // free the Flag array
 )
 
 // unsigned integer division x/zero: special cases for 0/0 and (pos)/0
-#define UNSIGNED_INTEGER_DIVISION_BY_ZERO(x)                                \
+#define UNSIGNED_INTEGER_DIVISION_BY_ZERO(x,xtype)                          \
 (                                                                           \
     ((x) == 0) ?                                                            \
     (                                                                       \
@@ -2127,17 +2288,17 @@ void GB_Flag_free ( ) ;             // free the Flag array
     :                                                                       \
     (                                                                       \
         /* x is positive: x/0 gives '+Inf' */                               \
-        PLUS_INF (x)                                                        \
+        PLUS_INF (xtype)                                                    \
     )                                                                       \
 )                                                                           \
 
 // unsigned integer division x/y: special case for y=0
-#define UNSIGNED_INTEGER_DIVISION(x,y)                                      \
+#define UNSIGNED_INTEGER_DIVISION(x,y,xtype)                                \
 (                                                                           \
     ((y) == 0) ?                                                            \
     (                                                                       \
         /* x/0 */                                                           \
-        UNSIGNED_INTEGER_DIVISION_BY_ZERO (x)                               \
+        UNSIGNED_INTEGER_DIVISION_BY_ZERO (x,xtype)                         \
     )                                                                       \
     :                                                                       \
     (                                                                       \
@@ -2147,25 +2308,25 @@ void GB_Flag_free ( ) ;             // free the Flag array
 )
 
 // x/y when x and y are signed or unsigned integers
-#define IDIV(x,y)                                                           \
+#define IDIV(x,y,xtype)                                                     \
 (                                                                           \
-    (IS_SIGNED (x)) ?                                                       \
+    (IS_SIGNED (xtype)) ?                                                   \
     (                                                                       \
-        SIGNED_INTEGER_DIVISION (x,y)                                       \
+        SIGNED_INTEGER_DIVISION (x,y,xtype)                                 \
     )                                                                       \
     :                                                                       \
     (                                                                       \
-        UNSIGNED_INTEGER_DIVISION (x,y)                                     \
+        UNSIGNED_INTEGER_DIVISION (x,y,xtype)                               \
     )                                                                       \
 )
 
 // 1/y when y is signed or unsigned integer
-#define IMINV(y)                                                            \
+#define IMINV(y,ytype)                                                      \
 (                                                                           \
     ((y) == 0) ?                                                            \
     (                                                                       \
         /* 1/0 */                                                           \
-        PLUS_INF (y)                                                        \
+        PLUS_INF (ytype)                                                    \
     )                                                                       \
     :                                                                       \
     (                                                                       \
@@ -2213,7 +2374,7 @@ void GB_Flag_free ( ) ;             // free the Flag array
 // smallest integer, and NaN to zero.  This is the same behavior as MATLAB.
 
 // cast a value x to the type of z
-#define CAST(z,x)                                                           \
+/* #define CAST(z,x)                                                        \
 {                                                                           \
     if (IS_INTEGER (z) && IS_FLOAT (x))                                     \
     {                                                                       \
@@ -2234,11 +2395,34 @@ void GB_Flag_free ( ) ;             // free the Flag array
     }                                                                       \
     else                                                                    \
     {                                                                       \
+        // trust the built-in typecast                                      \
+          z = (x) ;                                                         \
+    }                                                                       \
+}*/
+
+#define CAST(z,x,ztype,xtype)                                               \
+{                                                                           \
+    if (IS_INTEGER (ztype) && IS_FLOAT (xtype))                             \
+    {                                                                       \
+        if (isnan (x))                                                      \
+        {                                                                   \
+            z = 0 ;                                                         \
+        }                                                                   \
+        else if (!isfinite (x))                                             \
+        {                                                                   \
+            z = ((x) > 0) ? PLUS_INF (ztype) : MINUS_INF (ztype) ;          \
+        }                                                                   \
+        else                                                                \
+        {                                                                   \
+            z = (x) ;                                                       \
+        }                                                                   \
+    }                                                                       \
+    else                                                                    \
+    {                                                                       \
         /* trust the built-in typecast */                                   \
-        z = (x) ;                                                           \
+          z = (x) ;                                                         \
     }                                                                       \
 }
-
 
 //------------------------------------------------------------------------------
 // GB_BINARY_SEARCH
@@ -2374,10 +2558,13 @@ void GB_Flag_free ( ) ;             // free the Flag array
 #define IMAX(x,y) (((x) > (y)) ? (x) : (y))
 #define IMIN(x,y) (((x) < (y)) ? (x) : (y))
 
+// *** Defined isnan for verification, ACSL/Frama-C also follows the IEEE 754 Standard
+#define isnan(x) (x != x)
+
 // MIN for floating-point, same as min(x,y,'includenan') in MATLAB
-#define FMIN(x,y) ((isnan (x) || isnan (y)) ? NAN : IMIN (x,y))
+#define FMIN(x,y) ((isnan (x) || isnan (y)) ? nan ("") : IMIN (x,y))
 
 // MAX for floating-point, same as max(x,y,'includenan') in MATLAB
-#define FMAX(x,y) ((isnan (x) || isnan (y)) ? NAN : IMAX (x,y))
+#define FMAX(x,y) ((isnan (x) || isnan (y)) ? nan ("") : IMAX (x,y))
 
 #endif

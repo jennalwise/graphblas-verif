@@ -5,6 +5,11 @@
 // SuiteSparse:GraphBLAS, Timothy A. Davis, (c) 2017-2018, All Rights Reserved.
 // http://suitesparse.com   See GraphBLAS/Doc/License.txt for license.
 
+// Modified by Jenna Wise.
+// *** JENNA CHANGE 6/23/18 ***
+// Commented out the use of openmp #pragmas
+// Frama-C does not support openmp #pragmas
+
 //------------------------------------------------------------------------------
 
 // check if the matrix has pending computations (either pending tuples or
@@ -32,7 +37,7 @@ void GB_queue_insert            // insert matrix at the head of queue
     if ((A->npending > 0 || A->nzombies > 0) && !(A->enqueued))
     {
         // A is not in the queue yet, but needs to be there
-        #pragma omp critical (GB_queue)
+        // #pragma omp critical (GB_queue)
         {
             // check again to be safe, then add A to the head of the queue
             if ((A->npending > 0 || A->nzombies > 0) && !(A->enqueued))

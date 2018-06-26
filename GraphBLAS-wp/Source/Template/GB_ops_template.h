@@ -5,6 +5,9 @@
 // SuiteSparse:GraphBLAS, Timothy A. Davis, (c) 2017-2018, All Rights Reserved.
 // http://suitesparse.com   See GraphBLAS/Doc/License.txt for license.
 
+// *** JENNA CHANGE 6/25/18 ***
+// Added undef for TYPE_code def
+
 //------------------------------------------------------------------------------
 
 // This file is #include'd many times in GB.h to define the unary and binary
@@ -72,6 +75,7 @@ void CAST_NAME (double  ) (void *z, const void *x, size_t s) ;
 
 #undef GB
 #undef TYPE
+#undef TYPE_code
 #undef CAST_NAME
 
 #undef Z_X_ARGS

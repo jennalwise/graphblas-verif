@@ -5,6 +5,9 @@
 // SuiteSparse:GraphBLAS, Timothy A. Davis, (c) 2017-2018, All Rights Reserved.
 // http://suitesparse.com   See GraphBLAS/Doc/License.txt for license.
 
+// *** JENNA CHANGE 6/25/18 ***
+// Changed use of WORKER macro definition to match new WORKER macro definition
+
 //------------------------------------------------------------------------------
 
 // This is a generic switch factory for creating 121 workers that operate on
@@ -30,18 +33,18 @@ switch (code1)
         {
             //                            code1 code2
             #ifndef NSAME
-            case GB_BOOL_code   : WORKER (bool, bool)
+            case GB_BOOL_code   : WORKER (bool, bool, code1, code2)
             #endif
-            case GB_INT8_code   : WORKER (bool, int8_t)
-            case GB_UINT8_code  : WORKER (bool, uint8_t)
-            case GB_INT16_code  : WORKER (bool, int16_t)
-            case GB_UINT16_code : WORKER (bool, uint16_t)
-            case GB_INT32_code  : WORKER (bool, int32_t)
-            case GB_UINT32_code : WORKER (bool, uint32_t)
-            case GB_INT64_code  : WORKER (bool, int64_t)
-            case GB_UINT64_code : WORKER (bool, uint64_t)
-            case GB_FP32_code   : WORKER (bool, float)
-            case GB_FP64_code   : WORKER (bool, double)
+            case GB_INT8_code   : WORKER (bool, int8_t, code1, code2)
+            case GB_UINT8_code  : WORKER (bool, uint8_t, code1, code2)
+            case GB_INT16_code  : WORKER (bool, int16_t, code1, code2)
+            case GB_UINT16_code : WORKER (bool, uint16_t, code1, code2)
+            case GB_INT32_code  : WORKER (bool, int32_t, code1, code2)
+            case GB_UINT32_code : WORKER (bool, uint32_t, code1, code2)
+            case GB_INT64_code  : WORKER (bool, int64_t, code1, code2)
+            case GB_UINT64_code : WORKER (bool, uint64_t, code1, code2)
+            case GB_FP32_code   : WORKER (bool, float, code1, code2)
+            case GB_FP64_code   : WORKER (bool, double, code1, code2)
             default: ;
         }
         break ;
@@ -53,19 +56,19 @@ switch (code1)
         switch (code2)
         {
             //                            code1   code2
-            case GB_BOOL_code   : WORKER (int8_t, bool)
+            case GB_BOOL_code   : WORKER (int8_t, bool, code1, code2)
             #ifndef NSAME
-            case GB_INT8_code   : WORKER (int8_t, int8_t)
+            case GB_INT8_code   : WORKER (int8_t, int8_t, code1, code2)
             #endif
-            case GB_UINT8_code  : WORKER (int8_t, uint8_t)
-            case GB_INT16_code  : WORKER (int8_t, int16_t)
-            case GB_UINT16_code : WORKER (int8_t, uint16_t)
-            case GB_INT32_code  : WORKER (int8_t, int32_t)
-            case GB_UINT32_code : WORKER (int8_t, uint32_t)
-            case GB_INT64_code  : WORKER (int8_t, int64_t)
-            case GB_UINT64_code : WORKER (int8_t, uint64_t)
-            case GB_FP32_code   : WORKER (int8_t, float)
-            case GB_FP64_code   : WORKER (int8_t, double)
+            case GB_UINT8_code  : WORKER (int8_t, uint8_t, code1, code2)
+            case GB_INT16_code  : WORKER (int8_t, int16_t, code1, code2)
+            case GB_UINT16_code : WORKER (int8_t, uint16_t, code1, code2)
+            case GB_INT32_code  : WORKER (int8_t, int32_t, code1, code2)
+            case GB_UINT32_code : WORKER (int8_t, uint32_t, code1, code2)
+            case GB_INT64_code  : WORKER (int8_t, int64_t, code1, code2)
+            case GB_UINT64_code : WORKER (int8_t, uint64_t, code1, code2)
+            case GB_FP32_code   : WORKER (int8_t, float, code1, code2)
+            case GB_FP64_code   : WORKER (int8_t, double, code1, code2)
             default: ;
         }
         break ;
@@ -75,19 +78,19 @@ switch (code1)
         switch (code2)
         {
             //                            code1    code2
-            case GB_BOOL_code   : WORKER (uint8_t, bool)
-            case GB_INT8_code   : WORKER (uint8_t, int8_t)
+            case GB_BOOL_code   : WORKER (uint8_t, bool, code1, code2)
+            case GB_INT8_code   : WORKER (uint8_t, int8_t, code1, code2)
             #ifndef NSAME
-            case GB_UINT8_code  : WORKER (uint8_t, uint8_t)
+            case GB_UINT8_code  : WORKER (uint8_t, uint8_t, code1, code2)
             #endif
-            case GB_INT16_code  : WORKER (uint8_t, int16_t)
-            case GB_UINT16_code : WORKER (uint8_t, uint16_t)
-            case GB_INT32_code  : WORKER (uint8_t, int32_t)
-            case GB_UINT32_code : WORKER (uint8_t, uint32_t)
-            case GB_INT64_code  : WORKER (uint8_t, int64_t)
-            case GB_UINT64_code : WORKER (uint8_t, uint64_t)
-            case GB_FP32_code   : WORKER (uint8_t, float)
-            case GB_FP64_code   : WORKER (uint8_t, double)
+            case GB_INT16_code  : WORKER (uint8_t, int16_t, code1, code2)
+            case GB_UINT16_code : WORKER (uint8_t, uint16_t, code1, code2)
+            case GB_INT32_code  : WORKER (uint8_t, int32_t, code1, code2)
+            case GB_UINT32_code : WORKER (uint8_t, uint32_t, code1, code2)
+            case GB_INT64_code  : WORKER (uint8_t, int64_t, code1, code2)
+            case GB_UINT64_code : WORKER (uint8_t, uint64_t, code1, code2)
+            case GB_FP32_code   : WORKER (uint8_t, float, code1, code2)
+            case GB_FP64_code   : WORKER (uint8_t, double, code1, code2)
             default: ;
         }
         break ;
@@ -97,19 +100,19 @@ switch (code1)
         switch (code2)
         {
             //                            code1    code2
-            case GB_BOOL_code   : WORKER (int16_t, bool)
-            case GB_INT8_code   : WORKER (int16_t, int8_t)
-            case GB_UINT8_code  : WORKER (int16_t, uint8_t)
+            case GB_BOOL_code   : WORKER (int16_t, bool, code1, code2)
+            case GB_INT8_code   : WORKER (int16_t, int8_t, code1, code2)
+            case GB_UINT8_code  : WORKER (int16_t, uint8_t, code1, code2)
             #ifndef NSAME
-            case GB_INT16_code  : WORKER (int16_t, int16_t)
+            case GB_INT16_code  : WORKER (int16_t, int16_t, code1, code2)
             #endif
-            case GB_UINT16_code : WORKER (int16_t, uint16_t)
-            case GB_INT32_code  : WORKER (int16_t, int32_t)
-            case GB_UINT32_code : WORKER (int16_t, uint32_t)
-            case GB_INT64_code  : WORKER (int16_t, int64_t)
-            case GB_UINT64_code : WORKER (int16_t, uint64_t)
-            case GB_FP32_code   : WORKER (int16_t, float)
-            case GB_FP64_code   : WORKER (int16_t, double)
+            case GB_UINT16_code : WORKER (int16_t, uint16_t, code1, code2)
+            case GB_INT32_code  : WORKER (int16_t, int32_t, code1, code2)
+            case GB_UINT32_code : WORKER (int16_t, uint32_t, code1, code2)
+            case GB_INT64_code  : WORKER (int16_t, int64_t, code1, code2)
+            case GB_UINT64_code : WORKER (int16_t, uint64_t, code1, code2)
+            case GB_FP32_code   : WORKER (int16_t, float, code1, code2)
+            case GB_FP64_code   : WORKER (int16_t, double, code1, code2)
             default: ;
         }
         break ;
@@ -119,19 +122,19 @@ switch (code1)
         switch (code2)
         {
             //                            code1     code2
-            case GB_BOOL_code   : WORKER (uint16_t, bool)
-            case GB_INT8_code   : WORKER (uint16_t, int8_t)
-            case GB_UINT8_code  : WORKER (uint16_t, uint8_t)
-            case GB_INT16_code  : WORKER (uint16_t, int16_t)
+            case GB_BOOL_code   : WORKER (uint16_t, bool, code1, code2)
+            case GB_INT8_code   : WORKER (uint16_t, int8_t, code1, code2)
+            case GB_UINT8_code  : WORKER (uint16_t, uint8_t, code1, code2)
+            case GB_INT16_code  : WORKER (uint16_t, int16_t, code1, code2)
             #ifndef NSAME
-            case GB_UINT16_code : WORKER (uint16_t, uint16_t)
+            case GB_UINT16_code : WORKER (uint16_t, uint16_t, code1, code2)
             #endif
-            case GB_INT32_code  : WORKER (uint16_t, int32_t)
-            case GB_UINT32_code : WORKER (uint16_t, uint32_t)
-            case GB_INT64_code  : WORKER (uint16_t, int64_t)
-            case GB_UINT64_code : WORKER (uint16_t, uint64_t)
-            case GB_FP32_code   : WORKER (uint16_t, float)
-            case GB_FP64_code   : WORKER (uint16_t, double)
+            case GB_INT32_code  : WORKER (uint16_t, int32_t, code1, code2)
+            case GB_UINT32_code : WORKER (uint16_t, uint32_t, code1, code2)
+            case GB_INT64_code  : WORKER (uint16_t, int64_t, code1, code2)
+            case GB_UINT64_code : WORKER (uint16_t, uint64_t, code1, code2)
+            case GB_FP32_code   : WORKER (uint16_t, float, code1, code2)
+            case GB_FP64_code   : WORKER (uint16_t, double, code1, code2)
             default: ;
         }
         break ;
@@ -141,19 +144,19 @@ switch (code1)
         switch (code2)
         {
             //                            code1    code2
-            case GB_BOOL_code   : WORKER (int32_t, bool)
-            case GB_INT8_code   : WORKER (int32_t, int8_t)
-            case GB_UINT8_code  : WORKER (int32_t, uint8_t)
-            case GB_INT16_code  : WORKER (int32_t, int16_t)
-            case GB_UINT16_code : WORKER (int32_t, uint16_t)
+            case GB_BOOL_code   : WORKER (int32_t, bool, code1, code2)
+            case GB_INT8_code   : WORKER (int32_t, int8_t, code1, code2)
+            case GB_UINT8_code  : WORKER (int32_t, uint8_t, code1, code2)
+            case GB_INT16_code  : WORKER (int32_t, int16_t, code1, code2)
+            case GB_UINT16_code : WORKER (int32_t, uint16_t, code1, code2)
             #ifndef NSAME
-            case GB_INT32_code  : WORKER (int32_t, int32_t)
+            case GB_INT32_code  : WORKER (int32_t, int32_t, code1, code2)
             #endif
-            case GB_UINT32_code : WORKER (int32_t, uint32_t)
-            case GB_INT64_code  : WORKER (int32_t, int64_t)
-            case GB_UINT64_code : WORKER (int32_t, uint64_t)
-            case GB_FP32_code   : WORKER (int32_t, float)
-            case GB_FP64_code   : WORKER (int32_t, double)
+            case GB_UINT32_code : WORKER (int32_t, uint32_t, code1, code2)
+            case GB_INT64_code  : WORKER (int32_t, int64_t, code1, code2)
+            case GB_UINT64_code : WORKER (int32_t, uint64_t, code1, code2)
+            case GB_FP32_code   : WORKER (int32_t, float, code1, code2)
+            case GB_FP64_code   : WORKER (int32_t, double, code1, code2)
             default: ;
         }
         break ;
@@ -163,19 +166,19 @@ switch (code1)
         switch (code2)
         {
             //                            code1     code2
-            case GB_BOOL_code   : WORKER (uint32_t, bool)
-            case GB_INT8_code   : WORKER (uint32_t, int8_t)
-            case GB_UINT8_code  : WORKER (uint32_t, uint8_t)
-            case GB_INT16_code  : WORKER (uint32_t, int16_t)
-            case GB_UINT16_code : WORKER (uint32_t, uint16_t)
-            case GB_INT32_code  : WORKER (uint32_t, int32_t)
+            case GB_BOOL_code   : WORKER (uint32_t, bool, code1, code2)
+            case GB_INT8_code   : WORKER (uint32_t, int8_t, code1, code2)
+            case GB_UINT8_code  : WORKER (uint32_t, uint8_t, code1, code2)
+            case GB_INT16_code  : WORKER (uint32_t, int16_t, code1, code2)
+            case GB_UINT16_code : WORKER (uint32_t, uint16_t, code1, code2)
+            case GB_INT32_code  : WORKER (uint32_t, int32_t, code1, code2)
             #ifndef NSAME
-            case GB_UINT32_code : WORKER (uint32_t, uint32_t)
+            case GB_UINT32_code : WORKER (uint32_t, uint32_t, code1, code2)
             #endif
-            case GB_INT64_code  : WORKER (uint32_t, int64_t)
-            case GB_UINT64_code : WORKER (uint32_t, uint64_t)
-            case GB_FP32_code   : WORKER (uint32_t, float)
-            case GB_FP64_code   : WORKER (uint32_t, double)
+            case GB_INT64_code  : WORKER (uint32_t, int64_t, code1, code2)
+            case GB_UINT64_code : WORKER (uint32_t, uint64_t, code1, code2)
+            case GB_FP32_code   : WORKER (uint32_t, float, code1, code2)
+            case GB_FP64_code   : WORKER (uint32_t, double, code1, code2)
             default: ;
         }
         break ;
@@ -185,19 +188,19 @@ switch (code1)
         switch (code2)
         {
             //                            code1    code2
-            case GB_BOOL_code   : WORKER (int64_t, bool)
-            case GB_INT8_code   : WORKER (int64_t, int8_t)
-            case GB_UINT8_code  : WORKER (int64_t, uint8_t)
-            case GB_INT16_code  : WORKER (int64_t, int16_t)
-            case GB_UINT16_code : WORKER (int64_t, uint16_t)
-            case GB_INT32_code  : WORKER (int64_t, int32_t)
-            case GB_UINT32_code : WORKER (int64_t, uint32_t)
+            case GB_BOOL_code   : WORKER (int64_t, bool, code1, code2)
+            case GB_INT8_code   : WORKER (int64_t, int8_t, code1, code2)
+            case GB_UINT8_code  : WORKER (int64_t, uint8_t, code1, code2)
+            case GB_INT16_code  : WORKER (int64_t, int16_t, code1, code2)
+            case GB_UINT16_code : WORKER (int64_t, uint16_t, code1, code2)
+            case GB_INT32_code  : WORKER (int64_t, int32_t, code1, code2)
+            case GB_UINT32_code : WORKER (int64_t, uint32_t, code1, code2)
             #ifndef NSAME
-            case GB_INT64_code  : WORKER (int64_t, int64_t)
+            case GB_INT64_code  : WORKER (int64_t, int64_t, code1, code2)
             #endif
-            case GB_UINT64_code : WORKER (int64_t, uint64_t)
-            case GB_FP32_code   : WORKER (int64_t, float)
-            case GB_FP64_code   : WORKER (int64_t, double)
+            case GB_UINT64_code : WORKER (int64_t, uint64_t, code1, code2)
+            case GB_FP32_code   : WORKER (int64_t, float, code1, code2)
+            case GB_FP64_code   : WORKER (int64_t, double, code1, code2)
             default: ;
         }
         break ;
@@ -207,19 +210,19 @@ switch (code1)
         switch (code2)
         {
             //                            code1     code2
-            case GB_BOOL_code   : WORKER (uint64_t, bool)
-            case GB_INT8_code   : WORKER (uint64_t, int8_t)
-            case GB_UINT8_code  : WORKER (uint64_t, uint8_t)
-            case GB_INT16_code  : WORKER (uint64_t, int16_t)
-            case GB_UINT16_code : WORKER (uint64_t, uint16_t)
-            case GB_INT32_code  : WORKER (uint64_t, int32_t)
-            case GB_UINT32_code : WORKER (uint64_t, uint32_t)
-            case GB_INT64_code  : WORKER (uint64_t, int64_t)
+            case GB_BOOL_code   : WORKER (uint64_t, bool, code1, code2)
+            case GB_INT8_code   : WORKER (uint64_t, int8_t, code1, code2)
+            case GB_UINT8_code  : WORKER (uint64_t, uint8_t, code1, code2)
+            case GB_INT16_code  : WORKER (uint64_t, int16_t, code1, code2)
+            case GB_UINT16_code : WORKER (uint64_t, uint16_t, code1, code2)
+            case GB_INT32_code  : WORKER (uint64_t, int32_t, code1, code2)
+            case GB_UINT32_code : WORKER (uint64_t, uint32_t, code1, code2)
+            case GB_INT64_code  : WORKER (uint64_t, int64_t, code1, code2)
             #ifndef NSAME
-            case GB_UINT64_code : WORKER (uint64_t, uint64_t)
+            case GB_UINT64_code : WORKER (uint64_t, uint64_t, code1, code2)
             #endif
-            case GB_FP32_code   : WORKER (uint64_t, float)
-            case GB_FP64_code   : WORKER (uint64_t, double)
+            case GB_FP32_code   : WORKER (uint64_t, float, code1, code2)
+            case GB_FP64_code   : WORKER (uint64_t, double, code1, code2)
             default: ;
         }
         break ;
@@ -231,19 +234,19 @@ switch (code1)
         switch (code2)
         {
             //                            code1  code2
-            case GB_BOOL_code   : WORKER (float, bool)
-            case GB_INT8_code   : WORKER (float, int8_t)
-            case GB_UINT8_code  : WORKER (float, uint8_t)
-            case GB_INT16_code  : WORKER (float, int16_t)
-            case GB_UINT16_code : WORKER (float, uint16_t)
-            case GB_INT32_code  : WORKER (float, int32_t)
-            case GB_UINT32_code : WORKER (float, uint32_t)
-            case GB_INT64_code  : WORKER (float, int64_t)
-            case GB_UINT64_code : WORKER (float, uint64_t)
+            case GB_BOOL_code   : WORKER (float, bool, code1, code2)
+            case GB_INT8_code   : WORKER (float, int8_t, code1, code2)
+            case GB_UINT8_code  : WORKER (float, uint8_t, code1, code2)
+            case GB_INT16_code  : WORKER (float, int16_t, code1, code2)
+            case GB_UINT16_code : WORKER (float, uint16_t, code1, code2)
+            case GB_INT32_code  : WORKER (float, int32_t, code1, code2)
+            case GB_UINT32_code : WORKER (float, uint32_t, code1, code2)
+            case GB_INT64_code  : WORKER (float, int64_t, code1, code2)
+            case GB_UINT64_code : WORKER (float, uint64_t, code1, code2)
             #ifndef NSAME
-            case GB_FP32_code   : WORKER (float, float)
+            case GB_FP32_code   : WORKER (float, float, code1, code2)
             #endif
-            case GB_FP64_code   : WORKER (float, double)
+            case GB_FP64_code   : WORKER (float, double, code1, code2)
             default: ;
         }
         break ;
@@ -253,18 +256,18 @@ switch (code1)
         switch (code2)
         {
             //                            code1   code2
-            case GB_BOOL_code   : WORKER (double, bool)
-            case GB_INT8_code   : WORKER (double, int8_t)
-            case GB_UINT8_code  : WORKER (double, uint8_t)
-            case GB_INT16_code  : WORKER (double, int16_t)
-            case GB_UINT16_code : WORKER (double, uint16_t)
-            case GB_INT32_code  : WORKER (double, int32_t)
-            case GB_UINT32_code : WORKER (double, uint32_t)
-            case GB_INT64_code  : WORKER (double, int64_t)
-            case GB_UINT64_code : WORKER (double, uint64_t)
-            case GB_FP32_code   : WORKER (double, float)
+            case GB_BOOL_code   : WORKER (double, bool, code1, code2)
+            case GB_INT8_code   : WORKER (double, int8_t, code1, code2)
+            case GB_UINT8_code  : WORKER (double, uint8_t, code1, code2)
+            case GB_INT16_code  : WORKER (double, int16_t, code1, code2)
+            case GB_UINT16_code : WORKER (double, uint16_t, code1, code2)
+            case GB_INT32_code  : WORKER (double, int32_t, code1, code2)
+            case GB_UINT32_code : WORKER (double, uint32_t, code1, code2)
+            case GB_INT64_code  : WORKER (double, int64_t, code1, code2)
+            case GB_UINT64_code : WORKER (double, uint64_t, code1, code2)
+            case GB_FP32_code   : WORKER (double, float, code1, code2)
             #ifndef NSAME
-            case GB_FP64_code   : WORKER (double, double)
+            case GB_FP64_code   : WORKER (double, double, code1, code2)
             #endif
             default: ;
         }

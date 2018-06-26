@@ -5,6 +5,10 @@
 // SuiteSparse:GraphBLAS, Timothy A. Davis, (c) 2017-2018, All Rights Reserved.
 // http://suitesparse.com   See GraphBLAS/Doc/License.txt for license.
 
+// *** JENNA CHANGE 6/25/18 ***
+// Changed use of CAST macro definition to match new CAST macro definition
+// Changed WORKER macro definition to include the type codes for new CAST macro def
+
 //------------------------------------------------------------------------------
 
 // The input matrix is m-by-n with cnz nonzeros, with column pointers Ap of
@@ -65,7 +69,7 @@ void GB_transpose_ix        // transpose the pattern and values of a matrix
     // define the worker for the switch factory
     //--------------------------------------------------------------------------
 
-    #define WORKER(rtype,atype)                                 \
+    #define WORKER(rtype,atype,rcode,acode)                     \
     {                                                           \
         rtype *rx = (rtype *) Rx ;                              \
         atype *ax = (atype *) Ax ;                              \
@@ -76,7 +80,7 @@ void GB_transpose_ix        // transpose the pattern and values of a matrix
                 int64_t q = Rp [Ai [p]]++ ;                     \
                 Ri [q] = j ;                                    \
                 /* rx [q] = ax [p], type casting */             \
-                CAST (rx [q], ax [p]) ;                         \
+                CAST (rx [q], ax [p], rcode, acode) ;           \
             }                                                   \
         }                                                       \
         return ;                                                \

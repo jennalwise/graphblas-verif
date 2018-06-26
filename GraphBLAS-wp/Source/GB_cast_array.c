@@ -5,6 +5,10 @@
 // SuiteSparse:GraphBLAS, Timothy A. Davis, (c) 2017-2018, All Rights Reserved.
 // http://suitesparse.com   See GraphBLAS/Doc/License.txt for license.
 
+// *** JENNA CHANGE 6/25/18 ***
+// Changed use of CAST macro definition to match new CAST macro definition
+// Changed WORKER macro definition to include the type codes for new CAST macro def
+
 //------------------------------------------------------------------------------
 
 // Casts an input array A to an output array C with a different built-in type.
@@ -43,14 +47,14 @@ void GB_cast_array              // typecast an array
     // define the worker for the switch factory
     //--------------------------------------------------------------------------
 
-    #define WORKER(ctype,atype)             \
+    #define WORKER(ctype,atype,ccode,acode) \
     {                                       \
         ctype *c = (ctype *) C ;            \
         atype *a = (atype *) A ;            \
         for (int64_t k = 0 ; k < n ; k++)   \
         {                                   \
             /* c [k] = a [k] ; */           \
-            CAST (c [k], a [k]) ;           \
+            CAST (c [k], a [k], ccode, acode) ; \
         }                                   \
     }                                       \
     break ;

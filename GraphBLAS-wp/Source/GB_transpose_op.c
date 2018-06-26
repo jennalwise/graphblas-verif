@@ -5,6 +5,11 @@
 // SuiteSparse:GraphBLAS, Timothy A. Davis, (c) 2017-2018, All Rights Reserved.
 // http://suitesparse.com   See GraphBLAS/Doc/License.txt for license.
 
+// *** JENNA CHANGE 6/26/18 ***
+// Changed use of CAST macro definition to match new CAST macro definition
+// Changed WORKER macro definition to include the type codes for new CAST macro def
+// Changed use of IMINV macro definition to match new definition
+
 //------------------------------------------------------------------------------
 
 // The input matrix is m-by-n with cnz nonzeros, with column pointers Ap of
@@ -73,7 +78,7 @@ void GB_transpose_op        // transpose and apply an operator to a matrix
     //--------------------------------------------------------------------------
 
     // For built-in types only, thus xtype == ztype, but A_type can differ
-    #define WORKER(ztype,atype)                                 \
+    #define WORKER(ztype,atype,zcode,acode)                     \
     {                                                           \
         ztype *rx = (ztype *) Rx ;                              \
         atype *ax = (atype *) Ax ;                              \
@@ -85,7 +90,7 @@ void GB_transpose_op        // transpose and apply an operator to a matrix
                 Ri [q] = j ;                                    \
                 /* x = (ztype) ax [p], type casting */          \
                 ztype x ;                                       \
-                CAST (x, ax [p]) ;                              \
+                CAST (x, ax [p], zcode, acode) ;                \
                 /* apply the unary operator */                  \
                 rx [q] = OP (x) ;                               \
             }                                                   \
@@ -145,7 +150,7 @@ void GB_transpose_op        // transpose and apply an operator to a matrix
 
                 // see Source/GB.h discussion on boolean and integer division
                 #define BOP(x) true
-                #define IOP(x) IMINV(x)
+                #define IOP(x) IMINV(x,code1) // xtype == ztype represented by code1
                 #define FOP(x) 1./x
                 #include "GB_2type_template.c"
 
