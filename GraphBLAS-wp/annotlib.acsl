@@ -1,0 +1,112 @@
+//
+//  annotlib.acsl
+//  
+//
+//  Created by Jenna Wise on 7/2/18.
+//  Last updated on 7/2/18
+//  Predicate and logic functions for GrB structs
+//  Ensures encapsulation of the structs' internal representation in the annotations
+
+#include "GB.h"
+
+//------------------------------------------------------------------------------
+// GrB_Vector
+//------------------------------------------------------------------------------
+
+/*@
+ logic set<char*> vector_fp(GrB_Vector v) =
+    \union(v,
+           v->type,
+           v->p + (0..(v->ncols+1)-1),
+           v->i + (0..(v->nzmax)-1),
+           ((char*)(v->x + (0..(v->nzmax)-1))) + (0..(v->type->size)-1),
+           v->ipending + (0..(v->max_npending)-1),
+           v->jpending + (0..(v->max_npending)-1),
+           ((char*)(v->xpending + (0..(v->max_npending)-1))) + (0..(v->type->size)-1),
+           v->operator_pending,
+           (GrB_Matrix)(v->queue_next),
+           (GrB_Matrix)(v->queue_prev)) ;
+ */
+
+//------------------------------------------------------------------------------
+// GrB_Matrix
+//------------------------------------------------------------------------------
+
+/*@
+ logic int64_t matrix_nrows(GrB_Matrix m) = m->nrows ;
+ 
+ logic int64_t matrix_ncols(GrB_Matrix m) = m->ncols ;
+ 
+ logic int64_t matrix_nvals(GrB_Matrix m) = m->nzmax ;
+ 
+ logic size_t matrix_type_size(GrB_Matrix m) = m->type->size ;
+ 
+ logic int matrix_type_code(GrB_Matrix m) = m->type->code ;
+ 
+ logic set<char*> matrix_fp(GrB_Matrix m) =
+    \union(m,
+           m->type,
+           m->p + (0..(m->ncols+1)-1),
+           m->i + (0..(m->nzmax)-1),
+           ((char*)(m->x + (0..(m->nzmax)-1))) + (0..(m->type->size)-1),
+           m->ipending + (0..(m->max_npending)-1),
+           m->jpending + (0..(m->max_npending)-1),
+           ((char*)(m->xpending + (0..(m->max_npending)-1))) + (0..(m->type->size)-1),
+           m->operator_pending,
+           (GrB_Matrix)(m->queue_next),
+           (GrB_Matrix)(m->queue_prev)) ;
+ */
+
+/* TODO[MAYBE]: Queue linked list verification -- reachability predicates, etc. [might not
+ be necessary]
+ */
+
+/* TODO: Equality */
+
+//------------------------------------------------------------------------------
+// GrB_Type
+//------------------------------------------------------------------------------
+
+// no footprint
+/* TODO[MAYBE]: Equality */
+
+//------------------------------------------------------------------------------
+// GrB_Info
+//------------------------------------------------------------------------------
+
+// enum annotations - no footprint
+
+/* TODO[MAYBE]: Equality */
+
+//------------------------------------------------------------------------------
+// GrB_Monoid
+//------------------------------------------------------------------------------
+
+/*@
+ logic set<char*> monoid_fp(GrB_Monoid m) =
+    \union(m,
+           m->op,
+           ((char*)(m->identity)) + (0..(m->op->ztype->size)-1)) ;
+ */
+
+/* TODO[MAYBE]: Equality */
+
+//------------------------------------------------------------------------------
+// GrB_Semiring
+//------------------------------------------------------------------------------
+
+/*@
+ logic set<char*> semiring_fp(GrB_Semiring s) =
+    \union(s,
+           s->add,
+           s->multiply) ;
+ */
+
+/* TODO[MAYBE]: Equality */
+
+//------------------------------------------------------------------------------
+// GrB_Descriptor
+//------------------------------------------------------------------------------
+
+// no footprint -- GrB_Desc_Value is an enum type not a pointer type
+/* TODO[MAYBE]: Equality */

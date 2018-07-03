@@ -10,8 +10,10 @@
 // *** JENNA CHANGE 6/21/18 ***
 // Had to change all of the _Generic macro calls to their proper typed versions
 // Frama-C does not support _Generic
+// *** JENNA ANNOTATION 6/27/18 -- start of annotations ***
 
 #include "demos.h"
+#include "annotlib.acsl" // for useful common/factored out annotations
 
 //------------------------------------------------------------------------------
 // bfs5m: breadth first search using a Boolean semiring
@@ -23,6 +25,12 @@
 // v should be empty on input.)  The graph A need not be Boolean on input;
 // if it isn't Boolean, the semiring will properly typecast it to Boolean.
 
+// Annotations to be completed for bfs
+/*@
+ @ requires \valid(v_output);
+ @ assigns *v_output;
+ @ ensures \true;
+ */
 GrB_Info bfs5m              // BFS of a graph (using vector assign & reduce)
 (
     GrB_Vector *v_output,   // v [i] is the BFS level of node i in the graph
