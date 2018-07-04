@@ -1,73 +1,111 @@
 //
 //  annotlib.acsl
 //  
-//
-//  Created by Jenna Wise on 7/2/18.
-//  Last updated on 7/2/18
+//  SuiteSparse:GraphBLAS:Verification, Jenna L. Wise, (c) 2018, All Rights Reserved.
+//  Created on 7/2/18.
+//  Last updated on 7/4/18
 //  Predicate and logic functions for GrB structs
 //  Ensures encapsulation of the structs' internal representation in the annotations
+
+//  IMPORTANT NOTE TO SELF: null ptr checks for input to checks in GB implementation
+//                          occur in the check method implementation
+//                          I am making sure the intput ptr is valid before sending to
+//                          any of the valid predicates for checking of the struct
+//                          TODO: is this good or should I change to the GB impl strategy??
 
 #include "GB.h"
 
 //------------------------------------------------------------------------------
-// GrB_Vector
+// Common
 //------------------------------------------------------------------------------
 
 /*@
- logic set<char*> vector_fp(GrB_Vector v) =
-    \union(v,
-           v->type,
-           v->p + (0..(v->ncols+1)-1),
-           v->i + (0..(v->nzmax)-1),
-           ((char*)(v->x + (0..(v->nzmax)-1))) + (0..(v->type->size)-1),
-           v->ipending + (0..(v->max_npending)-1),
-           v->jpending + (0..(v->max_npending)-1),
-           ((char*)(v->xpending + (0..(v->max_npending)-1))) + (0..(v->type->size)-1),
-           v->operator_pending,
-           (GrB_Matrix)(v->queue_next),
-           (GrB_Matrix)(v->queue_prev)) ;
+ predicate magic_valid(int64_t magic) = magic == 0x00981B0787374E72 ;
  */
-
-//------------------------------------------------------------------------------
-// GrB_Matrix
-//------------------------------------------------------------------------------
-
-/*@
- logic int64_t matrix_nrows(GrB_Matrix m) = m->nrows ;
- 
- logic int64_t matrix_ncols(GrB_Matrix m) = m->ncols ;
- 
- logic int64_t matrix_nvals(GrB_Matrix m) = m->nzmax ;
- 
- logic size_t matrix_type_size(GrB_Matrix m) = m->type->size ;
- 
- logic int matrix_type_code(GrB_Matrix m) = m->type->code ;
- 
- logic set<char*> matrix_fp(GrB_Matrix m) =
-    \union(m,
-           m->type,
-           m->p + (0..(m->ncols+1)-1),
-           m->i + (0..(m->nzmax)-1),
-           ((char*)(m->x + (0..(m->nzmax)-1))) + (0..(m->type->size)-1),
-           m->ipending + (0..(m->max_npending)-1),
-           m->jpending + (0..(m->max_npending)-1),
-           ((char*)(m->xpending + (0..(m->max_npending)-1))) + (0..(m->type->size)-1),
-           m->operator_pending,
-           (GrB_Matrix)(m->queue_next),
-           (GrB_Matrix)(m->queue_prev)) ;
- */
-
-/* TODO[MAYBE]: Queue linked list verification -- reachability predicates, etc. [might not
- be necessary]
- */
-
-/* TODO: Equality */
 
 //------------------------------------------------------------------------------
 // GrB_Type
 //------------------------------------------------------------------------------
 
 // no footprint
+/*@
+ logic int type_code{L}(GrB_Type t) = t->code ;
+ 
+ logic size_t type_size{L}(GrB_Type t) = t->size ;
+ 
+ // TODO: make sure don't need more than magic check
+ predicate type_init{L}(GrB_Type t) = magic_valid(t->magic) ;
+ 
+ predicate type_code_valid{L}(GrB_Type t) =
+    \let c = type_code(t);
+        c == GB_BOOL_code   ||
+        c == GB_INT8_code   ||
+        c == GB_UINT8_code  ||
+        c == GB_INT16_code  ||
+        c == GB_UINT16_code ||
+        c == GB_INT32_code  ||
+        c == GB_UINT32_code ||
+        c == GB_INT64_code  ||
+        c == GB_UINT64_code ||
+        c == GB_FP32_code   ||
+        c == GB_FP64_code   ||
+        c == GB_UDT_code ;
+ 
+ predicate type_size_valid{L}(GrB_Type t) =
+    type_size(t) != 0 &&
+    (\let c = type_code(t);
+        (\let s = type_size(t);
+            (c == GB_BOOL_code ?
+                s == sizeof(bool) :
+            (c == GB_INT8_code ?
+                s == sizeof(int8_t) :
+            (c == GB_UINT8_code ?
+                s == sizeof(uint8_t) :
+            (c == GB_INT16_code ?
+                s == sizeof(int16_t) :
+            (c == GB_UINT16_code ?
+                s == sizeof(uint16_t) :
+            (c == GB_INT32_code ?
+                s == sizeof(int32_t) :
+            (c == GB_UINT32_code ?
+                s == sizeof(uint32_t) :
+            (c == GB_INT64_code ?
+                s == sizeof(int64_t) :
+            (c == GB_UINT64_code ?
+                s == sizeof(uint64_t) :
+            (c == GB_FP32_code ?
+                s == sizeof(float) :
+            (c == GB_FP64_code ?
+                s == sizeof(double) :
+            (c == GB_UDT_code ?
+                s == s :
+                \false
+            ))))))))))))
+        )
+    ) ;
+ */
+
+/*@
+ predicate type_valid{L}(GrB_Type t) =
+    type_init(t) &&
+    type_code_valid(t) &&
+    type_size_valid(t) ;
+ */
+
+
+/* TODO[MAYBE]: Equality */
+
+//------------------------------------------------------------------------------
+// GrB_BinaryOp
+//------------------------------------------------------------------------------
+
+/*@
+ // TODO: footprint function (if any)
+ 
+ // TODO: write this predicate
+ predicate binaryop_valid{L}(GrB_BinaryOp o) = \true ;
+ */
+
 /* TODO[MAYBE]: Equality */
 
 //------------------------------------------------------------------------------
@@ -79,11 +117,18 @@
 /* TODO[MAYBE]: Equality */
 
 //------------------------------------------------------------------------------
+// GrB_Descriptor
+//------------------------------------------------------------------------------
+
+// no footprint -- GrB_Desc_Value is an enum type not a pointer type
+/* TODO[MAYBE]: Equality */
+
+//------------------------------------------------------------------------------
 // GrB_Monoid
 //------------------------------------------------------------------------------
 
 /*@
- logic set<char*> monoid_fp(GrB_Monoid m) =
+ logic set<char*> monoid_fp{L}(GrB_Monoid m) =
     \union(m,
            m->op,
            ((char*)(m->identity)) + (0..(m->op->ztype->size)-1)) ;
@@ -96,7 +141,7 @@
 //------------------------------------------------------------------------------
 
 /*@
- logic set<char*> semiring_fp(GrB_Semiring s) =
+ logic set<char*> semiring_fp{L}(GrB_Semiring s) =
     \union(s,
            s->add,
            s->multiply) ;
@@ -105,8 +150,189 @@
 /* TODO[MAYBE]: Equality */
 
 //------------------------------------------------------------------------------
-// GrB_Descriptor
+// GrB_Matrix
 //------------------------------------------------------------------------------
 
-// no footprint -- GrB_Desc_Value is an enum type not a pointer type
-/* TODO[MAYBE]: Equality */
+/*@
+ logic int64_t matrix_nrows{L}(GrB_Matrix m) = m->nrows ;
+ 
+ logic int64_t matrix_ncols{L}(GrB_Matrix m) = m->ncols ;
+ 
+ logic int64_t matrix_nvals{L}(GrB_Matrix m) = m->nzmax ;
+ 
+ logic GrB_Type matrix_type{L}(GrB_Matrix m) = m->type ;
+ 
+ logic size_t matrix_type_size{L}(GrB_Matrix m) = m->type->size ;
+ 
+ logic int matrix_type_code{L}(GrB_Matrix m) = m->type->code ;
+ 
+ logic set<char*> matrix_fp{L}(GrB_Matrix m) =
+    \union(m,
+           m->type,
+           m->p + (0..(m->ncols+1)-1),
+           m->i + (0..(m->nzmax)-1),
+           ((char*)(m->x + (0..(m->nzmax)-1))) + (0..(m->type->size)-1),
+           m->ipending + (0..(m->max_npending)-1),
+           m->jpending + (0..(m->max_npending)-1),
+           ((char*)(m->xpending + (0..(m->max_npending)-1))) + (0..(m->type->size)-1),
+           m->operator_pending,
+           (GrB_Matrix)(m->queue_next),
+           (GrB_Matrix)(m->queue_prev)) ;
+ 
+ predicate matrix_init{L}(GrB_Matrix m) =
+    \valid(m->p + (0..(matrix_ncols(m)+1)-1)) &&
+    magic_valid(m->magic) ;
+ 
+ // helper function for row_indices_valid predicate
+ logic int64_t unflip(int64_t i) = (i < 0) ? (int64_t)((-i)-2) : i ;
+ 
+ // check row indices in bounds, no duplicates, and ensure sorted
+ predicate row_indices_valid{L}(GrB_Matrix m) =
+    matrix_init(m)
+    &&
+    \valid(m->i + (0..(matrix_nvals(m))-1))
+    &&
+    (\forall int64_t j; 0 <= j < matrix_ncols(m) ==>
+        (\forall int64_t p; (m->p)[j] <= p < (m->p)[j+1] ==>
+                0 <= unflip((m->i)[p]) < matrix_nrows(m)
+        )
+        &&
+        (\forall int64_t p; (m->p)[j] <= p < (m->p)[j+1]-1 ==>
+                unflip((m->i)[p]) < unflip((m->i)[p+1])
+        )
+    ) ;
+ 
+ // internal predicate to matrix_storage_valid
+ // not to be called directly
+ predicate pending_tuples_valid{L}(GrB_Matrix m) =
+    0 <= m->max_npending
+    &&
+    0 <= m->npending <= m->max_npending
+    &&
+    (m->npending == 0 ?
+        (m->xpending != \null || m->ipending != \null ||
+         m->jpending != \null || m->max_npending != 0 ?
+            \false : \true
+        ) :
+        ((m->xpending == \null || m->ipending == \null ||
+         (matrix_ncols(m) > 1 && m->jpending == \null) ?
+            \false : \true)
+         &&
+         \valid(m->ipending + (0..(m->max_npending)-1))
+         &&
+         \valid(m->jpending + (0..(m->max_npending)-1))
+         &&
+         tuple_indices_in_bounds :
+            (\forall int64_t k; 0 <= k < m->npending ==>
+                (\let i = (m->ipending)[k];
+                    (\let j = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k]));
+                         0 <= i < matrix_nrows(m) &&
+                         0 <= j < matrix_ncols(m)
+                    )
+                )
+            )
+         &&
+         tuple_indices_sorted :
+            (m->sorted_pending == \true ?
+                (\forall int64_t k; 0 <= k < m->npending-1 ==>
+                     (\let ilast = (m->ipending)[k];
+                         (\let jlast = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k]));
+                             (\let i = (m->ipending)[k+1];
+                                 (\let j = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k+1]));
+                                    jlast < j || (jlast == j && ilast <= i)
+                                 )
+                             )
+                         )
+                     )
+                ) :
+                !(\forall int64_t k; 0 <= k < m->npending-1 ==>
+                    (\let ilast = (m->ipending)[k];
+                        (\let jlast = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k]));
+                            (\let i = (m->ipending)[k+1];
+                                (\let j = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k+1]));
+                                    jlast < j || (jlast == j && ilast <= i)
+                                )
+                            )
+                        )
+                    )
+                 )
+            )
+         &&
+         operator_pending_valid :
+            (m->operator_pending == \null ?
+                \true :
+                \valid(m->operator_pending) && binaryop_valid(m->operator_pending)
+            )
+        )
+    ) ;
+ 
+ // check p, i, x, pix pendings, and zombies
+ // TODO [MAYBE]: not checking for correct number of
+ //               zombie indices when checking row indices
+ // TODO: figure out if should check that x and xpending are \valid?? I think yes
+ // TODO: figure out if in col_ptrs_valid should it be j < j+1 instead of j <= j+1??
+ // TODO: figure out if in col_ptrs_valid in the if statement is the indexing correct??
+ // TODO: fix sorted determination to do strong sorting instead of weak sorting;
+ //       0 <= k1 < k2 <= last_index ==> a[k1] < a[k2]
+ predicate matrix_storage_valid{L}(GrB_Matrix m) =
+    matrix_init(m)
+    &&
+    (matrix_nvals(m) == 0 ?
+        (m->x != \null || m->i != \null || m->i_shallow || m->x_shallow ?
+            \false :
+            (col_ptrs_valid :
+                \forall int64_t j; 0 <= j < matrix_ncols(m) ==> (m->p)[j] == 0
+            )
+        ) :
+        (m->x == \null || m->i == \null ? \false : \true)
+    )
+    &&
+    ((m->p)[0] != 0 ? \false : \true)
+    &&
+    col_ptrs_valid :
+        (\forall int64_t j; 0 <= j < matrix_ncols(m) ==>
+            (m->p)[j] <= (m->p)[j+1] <= matrix_nvals(m)
+        )
+    &&
+    0 <= m->nzombies <= (m->p)[matrix_ncols(m)]
+    &&
+    row_indices_valid(m)
+    &&
+    pending_tuples_valid(m) ;
+ */
+
+/*@
+ // nrows, ncols should be >0 by spec, but implementation check says >=0
+ predicate matrix_valid{L}(GrB_Matrix m) =
+    0 < matrix_nrows(m) <= \pow(2,60) &&
+    0 < matrix_ncols(m) <= \pow(2,60) &&
+    0 <= matrix_nvals(m) <= \pow(2,60) &&
+    \valid(matrix_type(m)) &&
+    type_valid(matrix_type(m)) &&
+    matrix_storage_valid(m) &&
+    \separated(matrix_fp(m)) ;
+ */
+
+/* TODO: Queue linked list verification -- reachability predicates, etc. -- validity of matrix object linked-list part -- in the queue when it should be, not in the queue when it shouldn't be, etc. to validate other parts of internal rep of matrix
+ */
+
+/* TODO: Equality */
+
+//------------------------------------------------------------------------------
+// GrB_Vector
+//------------------------------------------------------------------------------
+
+/*@
+ logic set<char*> vector_fp{L}(GrB_Vector v) =
+     \union(v,
+            v->type,
+            v->p + (0..(v->ncols+1)-1),
+            v->i + (0..(v->nzmax)-1),
+            ((char*)(v->x + (0..(v->nzmax)-1))) + (0..(v->type->size)-1),
+            v->ipending + (0..(v->max_npending)-1),
+            v->jpending + (0..(v->max_npending)-1),
+            ((char*)(v->xpending + (0..(v->max_npending)-1))) + (0..(v->type->size)-1),
+            v->operator_pending,
+            (GrB_Matrix)(v->queue_next),
+            (GrB_Matrix)(v->queue_prev)) ;
+ */
