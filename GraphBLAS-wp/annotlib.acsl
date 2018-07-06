@@ -9,9 +9,9 @@
 
 //  IMPORTANT NOTE TO SELF: null ptr checks for input to checks in GB implementation
 //                          occur in the check method implementation
-//                          I am making sure the intput ptr is valid before sending to
-//                          any of the valid predicates for checking of the struct
-//                          TODO: is this good or should I change to the GB impl strategy??
+//                          I am also doing ptr checks within _valid predicates with
+//                          \valid
+//                          makes sense since the ptrs are hidden in the typdef
 
 #include "GB.h"
 
@@ -36,6 +36,7 @@
  // TODO: make sure don't need more than magic check
  predicate type_init{L}(GrB_Type t) = magic_valid(t->magic) ;
  
+ // TODO: might be able to shorten this because of numbering of enums
  predicate type_code_valid{L}(GrB_Type t) =
     \let c = type_code(t);
         c == GB_BOOL_code   ||
@@ -87,6 +88,7 @@
 
 /*@
  predicate type_valid{L}(GrB_Type t) =
+    \valid(t) &&
     type_init(t) &&
     type_code_valid(t) &&
     type_size_valid(t) ;
@@ -98,12 +100,50 @@
 //------------------------------------------------------------------------------
 // GrB_BinaryOp
 //------------------------------------------------------------------------------
+// TODO[MAYBE]: refactor the ztype, xtype, and ytype names to be more descriptive
+//              ie. result_type, arg1_type, arg2_type
 
 /*@
- // TODO: footprint function (if any)
+ logic void* binaryop_func{L}(GrB_BinaryOp o) = o->function ;
  
- // TODO: write this predicate
- predicate binaryop_valid{L}(GrB_BinaryOp o) = \true ;
+ logic int binaryop_code{L}(GrB_BinaryOp o) = o->opcode ;
+ 
+ logic GrB_Type binaryop_ztype{L}(GrB_BinaryOp o) = o->ztype ;
+ 
+ logic GrB_Type binaryop_xtype{L}(GrB_BinaryOp o) = o->xtype ;
+ 
+ logic GrB_Type binaryop_ytype{L}(GrB_BinaryOp o) = o->ytype ;
+ 
+ logic set<char*> binaryop_fp{L}(GrB_BinaryOp o) =
+    \union(o,
+           ((char*)o->function) + (0..sizeof(o->function)-1),
+           o->ztype,
+           o->xtype,
+           o->ytype) ;
+ 
+ // TODO: check that this is enough to detect init
+ predicate binaryop_init{L}(GrB_BinaryOp o) = magic_valid(o->magic) ;
+ 
+ predicate binaryop_code_valid{L}(GrB_BinaryOp o) =
+    GB_FIRST_opcode <= binaryop_code(o) <= GB_USER_opcode ;
+ 
+ // used in monoid validity, assumes o is valid binaryop
+ // ie. binaryop_valid(o) == \true
+ predicate binaryop_domains_same{L}(GrB_BinaryOp o) =
+    binaryop_ztype(o) == binaryop_xtype(o) == binaryop_ytype(o) ;
+ */
+
+/*@
+ // z is the result of the op, x and y are the arguments to the op
+ predicate binaryop_valid{L}(GrB_BinaryOp o) =
+    \valid(o) &&
+    binaryop_init(o) &&
+    \valid(((char*)binaryop_func(o)) + (0..sizeof(binaryop_func(o))-1)) &&
+    binaryop_code_valid(o) &&
+    type_valid(binaryop_ztype(o)) &&
+    type_valid(binaryop_xtype(o)) &&
+    type_valid(binaryop_ytype(o)) &&
+    \separated(binaryop_fp(o)) ;
  */
 
 /* TODO[MAYBE]: Equality */
@@ -128,10 +168,25 @@
 //------------------------------------------------------------------------------
 
 /*@
+ logic GrB_BinaryOp monoid_op{L}(GrB_Monoid m) = m->op ;
+ 
  logic set<char*> monoid_fp{L}(GrB_Monoid m) =
     \union(m,
            m->op,
-           ((char*)(m->identity)) + (0..(m->op->ztype->size)-1)) ;
+           ((char*)m->identity) + (0..(m->op->ztype->size)-1)) ;
+ 
+ // TODO: check that this is enough to detect init
+ //       need op or identity to be valid??
+ predicate monoid_init{L}(GrB_Monoid m) = magic_valid(m->magic) ;
+ */
+
+/*@
+ predicate monoid_valid{L}(GrB_Monoid m) =
+    \valid(m) &&
+    monoid_init(m) &&
+    binaryop_valid(monoid_op(m)) &&
+    binaryop_domains_same(monoid_op(m)) &&
+    \separated(monoid_fp(m)) ;
  */
 
 /* TODO[MAYBE]: Equality */
@@ -141,10 +196,29 @@
 //------------------------------------------------------------------------------
 
 /*@
+ logic GrB_Monoid semiring_add{L}(GrB_Semiring s) = s->add ;
+ 
+ logic GrB_BinaryOp semiring_mult{L}(GrB_Semiring s) = s->multiply ;
+ 
  logic set<char*> semiring_fp{L}(GrB_Semiring s) =
     \union(s,
            s->add,
            s->multiply) ;
+ 
+ // TODO: check that this is enough to detect init
+ predicate semiring_init{L}(GrB_Semiring s) = magic_valid(s->magic) ;
+ */
+
+/*@
+ // might expose too much in implementation details
+ predicate semiring_valid{L}(GrB_Semiring s) =
+    \valid(s) &&
+    semiring_init(s) &&
+    monoid_valid(semiring_add(s)) &&
+    binaryop_valid(semiring_mult(s)) &&
+    binaryop_ztype(semiring_mult(s)) ==
+        binaryop_ztype(monoid_op(semiring_add(s))) &&
+    \separated(semiring_fp(s)) ;
  */
 
 /* TODO[MAYBE]: Equality */
@@ -304,10 +378,10 @@
 /*@
  // nrows, ncols should be >0 by spec, but implementation check says >=0
  predicate matrix_valid{L}(GrB_Matrix m) =
+    \valid(m) &&
     0 < matrix_nrows(m) <= \pow(2,60) &&
     0 < matrix_ncols(m) <= \pow(2,60) &&
     0 <= matrix_nvals(m) <= \pow(2,60) &&
-    \valid(matrix_type(m)) &&
     type_valid(matrix_type(m)) &&
     matrix_storage_valid(m) &&
     \separated(matrix_fp(m)) ;
