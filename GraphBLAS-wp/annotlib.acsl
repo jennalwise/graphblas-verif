@@ -13,6 +13,8 @@
 //                          \valid
 //                          makes sense since the ptrs are hidden in the typdef
 
+// TODO: Are the {L} labels correct?
+
 #include "GB.h"
 
 //------------------------------------------------------------------------------
@@ -152,15 +154,59 @@
 // GrB_Info
 //------------------------------------------------------------------------------
 
-// enum annotations - no footprint
+// GrB_Info is an enum type
 
-/* TODO[MAYBE]: Equality */
+/*@
+ predicate info_valid(GrB_Info i) =
+    i == GrB_SUCCESS              ||
+    i == GrB_NO_VALUE             ||
+    i == GrB_UNINITIALIZED_OBJECT ||
+    i == GrB_INVALID_OBJECT       ||
+    i == GrB_NULL_POINTER         ||
+    i == GrB_INVALID_VALUE        ||
+    i == GrB_INVALID_INDEX        ||
+    i == GrB_DOMAIN_MISMATCH      ||
+    i == GrB_DIMENSION_MISMATCH   ||
+    i == GrB_OUTPUT_NOT_EMPTY     ||
+    i == GrB_OUT_OF_MEMORY        ||
+    i == GrB_INSUFFICIENT_SPACE   ||
+    i == GrB_INDEX_OUT_OF_BOUNDS  ||
+    i == GrB_PANIC ;
+ */
 
 //------------------------------------------------------------------------------
 // GrB_Descriptor
 //------------------------------------------------------------------------------
 
 // no footprint -- GrB_Desc_Value is an enum type not a pointer type
+
+/*@
+ logic GrB_Desc_Value descriptor_output{L}(GrB_Descriptor d) = d->out ;
+ 
+ logic GrB_Desc_Value descriptor_mask{L}(GrB_Descriptor d) = d->mask ;
+ 
+ logic GrB_Desc_Value descriptor_input1{L}(GrB_Descriptor d) = d->in0 ;
+ 
+ logic GrB_Desc_Value descriptor_input2{L}(GrB_Descriptor d) = d->in1 ;
+ 
+ // TODO: check that this is enough to detect init
+ predicate descriptor_init{L}(GrB_Descriptor d) = magic_valid(d->magic) ;
+ 
+ // nondefault should be the valid GrB_Desc_Value that v should be
+ predicate descriptor_value_valid(GrB_Desc_Value v, GrB_Desc_Value nondefault) =
+    v == GxB_DEFAULT || v == nondefault ;
+ */
+
+/*@
+ predicate descriptor_valid{L}(GrB_Descriptor d) =
+    \valid(d) &&
+    descriptor_init(d) &&
+    descriptor_value_valid(descriptor_output(d), GrB_REPLACE) &&
+    descriptor_value_valid(descriptor_mask(d), GrB_SCMP) &&
+    descriptor_value_valid(descriptor_input1(d), GrB_TRAN) &&
+    descriptor_value_valid(descriptor_input2(d), GrB_TRAN) ;
+ */
+ 
 /* TODO[MAYBE]: Equality */
 
 //------------------------------------------------------------------------------
@@ -235,10 +281,6 @@
  logic int64_t matrix_nvals{L}(GrB_Matrix m) = m->nzmax ;
  
  logic GrB_Type matrix_type{L}(GrB_Matrix m) = m->type ;
- 
- logic size_t matrix_type_size{L}(GrB_Matrix m) = m->type->size ;
- 
- logic int matrix_type_code{L}(GrB_Matrix m) = m->type->code ;
  
  logic set<char*> matrix_fp{L}(GrB_Matrix m) =
     \union(m,
@@ -397,16 +439,19 @@
 //------------------------------------------------------------------------------
 
 /*@
- logic set<char*> vector_fp{L}(GrB_Vector v) =
-     \union(v,
-            v->type,
-            v->p + (0..(v->ncols+1)-1),
-            v->i + (0..(v->nzmax)-1),
-            ((char*)(v->x + (0..(v->nzmax)-1))) + (0..(v->type->size)-1),
-            v->ipending + (0..(v->max_npending)-1),
-            v->jpending + (0..(v->max_npending)-1),
-            ((char*)(v->xpending + (0..(v->max_npending)-1))) + (0..(v->type->size)-1),
-            v->operator_pending,
-            (GrB_Matrix)(v->queue_next),
-            (GrB_Matrix)(v->queue_prev)) ;
+ logic int64_t vector_nrows{L}(GrB_Vector v) = v->nrows ;
+ 
+ logic int64_t vector_ncols{L}(GrB_Vector v) = v->ncols ;
+ 
+ logic int64_t vector_nvals{L}(GrB_Vector v) = v->nzmax ;
+ 
+ logic GrB_Type vector_type{L}(GrB_Vector v) = v->type ;
+ 
+ logic set<char*> vector_fp{L}(GrB_Vector v) = matrix_fp((GrB_Matrix)v) ;
+ */
+
+/*@
+ predicate vector_valid{L}(GrB_Vector v) =
+    matrix_valid((GrB_Matrix)v) &&
+    vector_ncols(v) == 1 ;
  */
