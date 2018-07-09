@@ -100,19 +100,17 @@
 //------------------------------------------------------------------------------
 // GrB_BinaryOp
 //------------------------------------------------------------------------------
-// TODO[MAYBE]: refactor the ztype, xtype, and ytype names to be more descriptive
-//              ie. result_type, arg1_type, arg2_type
 
 /*@
  logic void* binaryop_func{L}(GrB_BinaryOp o) = o->function ;
  
  logic int binaryop_code{L}(GrB_BinaryOp o) = o->opcode ;
  
- logic GrB_Type binaryop_ztype{L}(GrB_BinaryOp o) = o->ztype ;
+ logic GrB_Type binaryop_outtype{L}(GrB_BinaryOp o) = o->ztype ;
  
- logic GrB_Type binaryop_xtype{L}(GrB_BinaryOp o) = o->xtype ;
+ logic GrB_Type binaryop_in1type{L}(GrB_BinaryOp o) = o->xtype ;
  
- logic GrB_Type binaryop_ytype{L}(GrB_BinaryOp o) = o->ytype ;
+ logic GrB_Type binaryop_in2type{L}(GrB_BinaryOp o) = o->ytype ;
  
  logic set<char*> binaryop_fp{L}(GrB_BinaryOp o) =
     \union(o,
@@ -129,20 +127,19 @@
  // used in monoid validity, assumes o is valid binaryop
  // ie. binaryop_valid(o) == \true
  predicate binaryop_domains_same{L}(GrB_BinaryOp o) =
-    binaryop_ztype(o) == binaryop_xtype(o) == binaryop_ytype(o) ;
+    binaryop_outtype(o) == binaryop_in1type(o) == binaryop_in2type(o) ;
  */
 
 /*@
- // z is the result of the op, x and y are the arguments to the op
  predicate binaryop_valid{L}(GrB_BinaryOp o) =
     \valid(o) &&
+    \separated(binaryop_fp(o)) &&
     binaryop_init(o) &&
     \valid(((char*)binaryop_func(o)) + (0..sizeof(binaryop_func(o))-1)) &&
     binaryop_code_valid(o) &&
-    type_valid(binaryop_ztype(o)) &&
-    type_valid(binaryop_xtype(o)) &&
-    type_valid(binaryop_ytype(o)) &&
-    \separated(binaryop_fp(o)) ;
+    type_valid(binaryop_outtype(o)) &&
+    type_valid(binaryop_in1type(o)) &&
+    type_valid(binaryop_in2type(o)) ;
  */
 
 /* TODO[MAYBE]: Equality */
@@ -255,8 +252,8 @@
     semiring_init(s) &&
     monoid_valid(semiring_add(s)) &&
     binaryop_valid(semiring_mult(s)) &&
-    binaryop_ztype(semiring_mult(s)) ==
-        binaryop_ztype(monoid_op(semiring_add(s))) &&
+    binaryop_outtype(semiring_mult(s)) ==
+        binaryop_outtype(monoid_op(semiring_add(s))) &&
     \separated(semiring_fp(s)) ;
  */
 
