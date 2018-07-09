@@ -306,8 +306,8 @@
             )
         &&
         sorted_no_dups :
-            (\forall int64_t p1, int64_t p2; (m->p)[j] <= p1 < p2 < (m->p)[j+1] ==>
-                unflip((m->i)[p1]) < unflip((m->i)[p2])
+            (\forall int64_t p; (m->p)[j] <= p < (m->p)[j+1]-1 ==>
+                unflip((m->i)[p]) < unflip((m->i)[p+1])
             )
     ) ;
  
@@ -346,22 +346,22 @@
          &&
          tuple_indices_sorted :
             (m->sorted_pending == \true ?
-                (\forall int64_t k1, int64_t k2; 0 <= k1 <= k2 < m->npending ==>
-                     (\let ilast = (m->ipending)[k1];
-                         (\let jlast = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k1]));
-                             (\let i = (m->ipending)[k2];
-                                 (\let j = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k2]));
+                (\forall int64_t k; 0 <= k < m->npending-1 ==>
+                     (\let ilast = (m->ipending)[k];
+                         (\let jlast = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k]));
+                             (\let i = (m->ipending)[k+1];
+                                 (\let j = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k+1]));
                                     jlast < j || (jlast == j && ilast <= i)
                                  )
                              )
                          )
                      )
                 ) :
-                !(\forall int64_t k1, int64_t k2; 0 <= k1 <= k2 < m->npending ==>
-                    (\let ilast = (m->ipending)[k1];
-                        (\let jlast = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k1]));
-                            (\let i = (m->ipending)[k2];
-                                (\let j = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k2]));
+                !(\forall int64_t k; 0 <= k < m->npending-1 ==>
+                    (\let ilast = (m->ipending)[k];
+                        (\let jlast = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k]));
+                            (\let i = (m->ipending)[k+1];
+                                (\let j = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k+1]));
                                     jlast < j || (jlast == j && ilast <= i)
                                 )
                             )
@@ -373,15 +373,12 @@
          operator_pending_valid :
             (m->operator_pending == \null ?
                 \true :
-                \valid(m->operator_pending) && binaryop_valid(m->operator_pending)
+                binaryop_valid(m->operator_pending)
             )
         )
     ) ;
  
  // check p, i, x, pix pendings, and zombies
- 
- // TODO: figure out if in col_ptrs_valid should it be j < j+1 instead of j <= j+1??
- // TODO: figure out if in col_ptrs_valid in the if statement is the indexing correct??
  predicate matrix_storage_valid{L}(GrB_Matrix m) =
     \valid(m->p + (0..(matrix_ncols(m)+1)-1))
     &&
@@ -394,19 +391,19 @@
         ) :
         (m->x == \null || m->i == \null ?
             \false :
+            ((m->p)[0] != 0 ? \false : \true)
+            &&
+            col_ptrs_valid :
+                (\forall int64_t j; 0 <= j < matrix_ncols(m) ==>
+                    (m->p)[j] <= (m->p)[j+1] <= matrix_nvals(m)
+                )
+            &&
             \valid(((char*)(m->x + (0..(matrix_nvals(m))-1))) +
                 (0..type_size(matrix_type(m))-1))
             &&
             row_indices_valid(m)
         )
     )
-    &&
-    ((m->p)[0] != 0 ? \false : \true)
-    &&
-    col_ptrs_valid :
-        (\forall int64_t j; 0 <= j < matrix_ncols(m) ==>
-            (m->p)[j] <= (m->p)[j+1] <= matrix_nvals(m)
-        )
     &&
     0 <= m->nzombies <= (m->p)[matrix_ncols(m)]
     &&
@@ -417,13 +414,13 @@
  // nrows, ncols should be >0 by spec, but implementation check says >=0
  predicate matrix_valid{L}(GrB_Matrix m) =
     \valid(m) &&
+    \separated(matrix_fp(m)) &&
     matrix_init(m) &&
     0 < matrix_nrows(m) <= \pow(2,60) &&
     0 < matrix_ncols(m) <= \pow(2,60) &&
     0 <= matrix_nvals(m) <= \pow(2,60) &&
     type_valid(matrix_type(m)) &&
-    matrix_storage_valid(m) &&
-    \separated(matrix_fp(m)) ;
+    matrix_storage_valid(m) ;
  */
 
 /* TODO: Queue linked list verification -- reachability predicates, etc. -- validity of matrix object linked-list part -- in the queue when it should be, not in the queue when it shouldn't be, etc. to validate other parts of internal rep of matrix
