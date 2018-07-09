@@ -300,13 +300,15 @@
     \valid(m->i + (0..(matrix_nvals(m))-1))
     &&
     (\forall int64_t j; 0 <= j < matrix_ncols(m) ==>
-        (\forall int64_t p; (m->p)[j] <= p < (m->p)[j+1] ==>
+        in_bounds :
+            (\forall int64_t p; (m->p)[j] <= p < (m->p)[j+1] ==>
                 0 <= unflip((m->i)[p]) < matrix_nrows(m)
-        )
+            )
         &&
-        (\forall int64_t p; (m->p)[j] <= p < (m->p)[j+1]-1 ==>
-                unflip((m->i)[p]) < unflip((m->i)[p+1])
-        )
+        sorted_no_dups :
+            (\forall int64_t p1, int64_t p2; (m->p)[j] <= p1 < p2 < (m->p)[j+1] ==>
+                unflip((m->i)[p1]) < unflip((m->i)[p2])
+            )
     ) ;
  
  // internal predicate to matrix_storage_valid
@@ -344,22 +346,22 @@
          &&
          tuple_indices_sorted :
             (m->sorted_pending == \true ?
-                (\forall int64_t k; 0 <= k < m->npending-1 ==>
-                     (\let ilast = (m->ipending)[k];
-                         (\let jlast = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k]));
-                             (\let i = (m->ipending)[k+1];
-                                 (\let j = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k+1]));
+                (\forall int64_t k1, int64_t k2; 0 <= k1 <= k2 < m->npending ==>
+                     (\let ilast = (m->ipending)[k1];
+                         (\let jlast = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k1]));
+                             (\let i = (m->ipending)[k2];
+                                 (\let j = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k2]));
                                     jlast < j || (jlast == j && ilast <= i)
                                  )
                              )
                          )
                      )
                 ) :
-                !(\forall int64_t k; 0 <= k < m->npending-1 ==>
-                    (\let ilast = (m->ipending)[k];
-                        (\let jlast = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k]));
-                            (\let i = (m->ipending)[k+1];
-                                (\let j = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k+1]));
+                !(\forall int64_t k1, int64_t k2; 0 <= k1 <= k2 < m->npending ==>
+                    (\let ilast = (m->ipending)[k1];
+                        (\let jlast = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k1]));
+                            (\let i = (m->ipending)[k2];
+                                (\let j = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k2]));
                                     jlast < j || (jlast == j && ilast <= i)
                                 )
                             )
@@ -380,8 +382,6 @@
  
  // TODO: figure out if in col_ptrs_valid should it be j < j+1 instead of j <= j+1??
  // TODO: figure out if in col_ptrs_valid in the if statement is the indexing correct??
- // TODO: fix sorted determination to do strong sorting instead of weak sorting;
- //       0 <= k1 < k2 <= last_index ==> a[k1] < a[k2]
  predicate matrix_storage_valid{L}(GrB_Matrix m) =
     \valid(m->p + (0..(matrix_ncols(m)+1)-1))
     &&
