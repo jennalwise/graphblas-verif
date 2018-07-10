@@ -3,7 +3,7 @@
 //  
 //  SuiteSparse:GraphBLAS:Verification, Jenna L. Wise, (c) 2018, All Rights Reserved.
 //  Created on 7/2/18.
-//  Last updated on 7/4/18
+//  Last updated on 7/10/18
 //  Predicate and logic functions for GrB structs
 //  Ensures encapsulation of the structs' internal representation in the annotations
 
@@ -179,13 +179,13 @@
  
  logic GrB_Desc_Value descriptor_mask{L}(GrB_Descriptor d) = d->mask ;
  
- logic GrB_Desc_Value descriptor_input1{L}(GrB_Descriptor d) = d->in0 ;
+ logic GrB_Desc_Value descriptor_input0{L}(GrB_Descriptor d) = d->in0 ;
  
- logic GrB_Desc_Value descriptor_input2{L}(GrB_Descriptor d) = d->in1 ;
+ logic GrB_Desc_Value descriptor_input1{L}(GrB_Descriptor d) = d->in1 ;
  
  predicate descriptor_init{L}(GrB_Descriptor d) = magic_valid(d->magic) ;
  
- // nondefault should be the valid GrB_Desc_Value that v should be
+ // nondefault should be the valid nondefault GrB_Desc_Value that v should be
  predicate descriptor_value_valid(GrB_Desc_Value v, GrB_Desc_Value nondefault) =
     v == GxB_DEFAULT || v == nondefault ;
  */
@@ -196,8 +196,8 @@
     descriptor_init(d) &&
     descriptor_value_valid(descriptor_output(d), GrB_REPLACE) &&
     descriptor_value_valid(descriptor_mask(d), GrB_SCMP) &&
-    descriptor_value_valid(descriptor_input1(d), GrB_TRAN) &&
-    descriptor_value_valid(descriptor_input2(d), GrB_TRAN) ;
+    descriptor_value_valid(descriptor_input0(d), GrB_TRAN) &&
+    descriptor_value_valid(descriptor_input1(d), GrB_TRAN) ;
  */
  
 /* TODO[MAYBE]: Equality */
