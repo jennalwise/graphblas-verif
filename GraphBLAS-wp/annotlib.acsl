@@ -262,8 +262,13 @@
 // GrB_Semiring
 //------------------------------------------------------------------------------
 
+/* TODO: check that a valid semiring's monoid is commutative */
+
 /*@
- logic GrB_Monoid semiring_add{L}(GrB_Semiring s) = s->add ;
+ logic GrB_Monoid semiring_monoid{L}(GrB_Semiring s) = s->add ;
+ 
+ // assumes that s->add is a valid monoid, ie. monoid_valid(s->add) == \true
+ logic GrB_BinaryOp semiring_add{L}(GrB_Semiring s) = s->add->op ;
  
  logic GrB_BinaryOp semiring_mult{L}(GrB_Semiring s) = s->multiply ;
  
@@ -280,10 +285,10 @@
  predicate semiring_valid{L}(GrB_Semiring s) =
     \valid(s) &&
     semiring_init(s) &&
-    monoid_valid(semiring_add(s)) &&
+    monoid_valid(semiring_monoid(s)) &&
     binaryop_valid(semiring_mult(s)) &&
     binaryop_outtype(semiring_mult(s)) ==
-        binaryop_outtype(monoid_op(semiring_add(s))) &&
+        binaryop_outtype(semiring_add(s)) &&
     \separated(semiring_fp(s)) ;
  */
 
