@@ -133,13 +133,13 @@
 /*@
  predicate binaryop_valid{L}(GrB_BinaryOp o) =
     \valid(o) &&
-    \separated(binaryop_fp(o)) &&
     binaryop_init(o) &&
     \valid(((char*)binaryop_func(o)) + (0..sizeof(binaryop_func(o))-1)) &&
     binaryop_code_valid(o) &&
     type_valid(binaryop_outtype(o)) &&
     type_valid(binaryop_in1type(o)) &&
-    type_valid(binaryop_in2type(o)) ;
+    type_valid(binaryop_in2type(o)) &&
+    \separated(binaryop_fp(o)) ;
  */
 
 /* TODO[MAYBE]: Equality */
@@ -206,8 +206,15 @@
 // GrB_Monoid
 //------------------------------------------------------------------------------
 
+/* TODO: specification validity for monoid not already checked - binaryop is
+         associative, identity is in fact an identity element of the binaryop &
+         domain, other algebraic properties of a monoid not checked
+ */
+
 /*@
  logic GrB_BinaryOp monoid_op{L}(GrB_Monoid m) = m->op ;
+ 
+ logic void* monoid_identity{L}(GrB_Monoid m) = m->identity ;
  
  logic set<char*> monoid_fp{L}(GrB_Monoid m) =
     \union(m,
@@ -215,6 +222,26 @@
            ((char*)m->identity) + (0..(m->op->ztype->size)-1)) ;
  
  predicate monoid_init{L}(GrB_Monoid m) = magic_valid(m->magic) ;
+ 
+ // assumes the monoid's binary op is valid,
+ // ie. binaryop_valid(monoid_op(m)) == \true
+ // assumes the monoid's identity element can be deferenced
+ // ie. \valid(((char*)m->identity) +
+ //         (0..(type_size(binaryop_outtype(monoid_op(m))))-1)) == \true
+ // internal predicate of monoid_valid
+ predicate identity_is_zero_bool_valid{L}(GrB_Monoid m) =
+    (m->identity_is_zero == \true ?
+        (\let i = (int8_t*)monoid_identity(m);
+            (\forall int64_t k; 0 <= k < type_size(binaryop_outtype(monoid_op(m)))
+                ==> i[k] == 0
+            )
+        ) :
+        !(\let i = (int8_t*)monoid_identity(m);
+            (\forall int64_t k; 0 <= k < type_size(binaryop_outtype(monoid_op(m)))
+                ==> i[k] == 0
+            )
+         )
+    ) ;
  */
 
 /*@
@@ -223,6 +250,9 @@
     monoid_init(m) &&
     binaryop_valid(monoid_op(m)) &&
     binaryop_domains_same(monoid_op(m)) &&
+    \valid(((char*)m->identity) +
+        (0..(type_size(binaryop_outtype(monoid_op(m))))-1)) &&
+    identity_is_zero_bool_valid(m) &&
     \separated(monoid_fp(m)) ;
  */
 
@@ -411,19 +441,23 @@
  // nrows, ncols should be >0 by spec, but implementation check says >=0
  predicate matrix_valid{L}(GrB_Matrix m) =
     \valid(m) &&
-    \separated(matrix_fp(m)) &&
     matrix_init(m) &&
     0 < matrix_nrows(m) <= \pow(2,60) &&
     0 < matrix_ncols(m) <= \pow(2,60) &&
     0 <= matrix_nvals(m) <= \pow(2,60) &&
     type_valid(matrix_type(m)) &&
-    matrix_storage_valid(m) ;
+    matrix_storage_valid(m) &&
+    \separated(matrix_fp(m)) ;
  */
 
-/* TODO: Queue linked list verification -- reachability predicates, etc. -- validity of matrix object linked-list part -- in the queue when it should be, not in the queue when it shouldn't be, etc. to validate other parts of internal rep of matrix
+/* TODO: Queue linked list verification -- reachability predicates, etc.
+         -- validity of matrix object linked-list part -- in the queue when it
+         should be, not in the queue when it shouldn't be, etc. to validate other
+         parts of internal rep of matrix
  */
 
-/* TODO [MAYBE]: not checking for correct number of zombie indices when checking row indices requires ghost code -- for matrix valid
+/* TODO [MAYBE]: not checking for correct number of zombie indices when checking
+                 row indices requires ghost code -- for matrix valid
  */
 
 /* TODO: Equality */
