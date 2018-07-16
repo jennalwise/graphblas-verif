@@ -25,6 +25,170 @@
  predicate magic_valid(int64_t magic) = magic == 0x00981B0787374E72 ;
  */
 
+/*@
+ // default is false, because any other cast would be unsound to WP
+ predicate void_ptr_valid{L}(void *p, int c) =
+    (c == GB_BOOL_code ?
+        \valid((bool*)p) :
+    (c == GB_INT8_code ?
+        \valid((int8_t*)p) :
+    (c == GB_UINT8_code ?
+        \valid((uint8_t*)p) :
+    (c == GB_INT16_code ?
+        \valid((int16_t*)p) :
+    (c == GB_UINT16_code ?
+        \valid((uint16_t*)p) :
+    (c == GB_INT32_code ?
+        \valid((int32_t*)p) :
+    (c == GB_UINT32_code ?
+        \valid((uint32_t*)p) :
+    (c == GB_INT64_code ?
+        \valid((int64_t*)p) :
+    (c == GB_UINT64_code ?
+        \valid((uint64_t*)p) :
+    (c == GB_FP32_code ?
+        \valid((float*)p) :
+    (c == GB_FP64_code ?
+        \valid((double*)p) :
+        \false
+    ))))))))))) ;
+ 
+ // default is false, because any other cast would be unsound to WP
+ predicate void_ptr_array_valid{L}(void *p, int c, int64_t size) =
+    (c == GB_BOOL_code ?
+        \valid((bool*)p + (0..size-1)) :
+    (c == GB_INT8_code ?
+        \valid((int8_t*)p + (0..size-1)) :
+    (c == GB_UINT8_code ?
+        \valid((uint8_t*)p + (0..size-1)) :
+    (c == GB_INT16_code ?
+        \valid((int16_t*)p + (0..size-1)) :
+    (c == GB_UINT16_code ?
+        \valid((uint16_t*)p + (0..size-1)) :
+    (c == GB_INT32_code ?
+        \valid((int32_t*)p + (0..size-1)) :
+    (c == GB_UINT32_code ?
+        \valid((uint32_t*)p + (0..size-1)) :
+    (c == GB_INT64_code ?
+        \valid((int64_t*)p + (0..size-1)) :
+    (c == GB_UINT64_code ?
+        \valid((uint64_t*)p + (0..size-1)) :
+    (c == GB_FP32_code ?
+        \valid((float*)p + (0..size-1)) :
+    (c == GB_FP64_code ?
+        \valid((double*)p + (0..size-1)) :
+        \false
+    ))))))))))) ;
+ 
+ // default is false, because any other cast would be unsound to WP
+ // t should be an input type code of the binary operator
+ // TODO[ENHANCEMENT]: should also check that the opcode matches the assigned
+ //                    function
+ predicate void_ptr_binary_function_valid{L}(void *p, int t) =
+    (t == GB_BOOL_code ?
+        p == &GB_FIRST_f_BOOL || p == &GB_SECOND_f_BOOL || p == &GB_MIN_f_BOOL   ||
+        p == &GB_MAX_f_BOOL   || p == &GB_PLUS_f_BOOL   || p == &GB_MINUS_f_BOOL ||
+        p == &GB_TIMES_f_BOOL || p == &GB_DIV_f_BOOL    || p == &GB_ISEQ_f_BOOL  ||
+        p == &GB_ISNE_f_BOOL  || p == &GB_ISGT_f_BOOL   || p == &GB_ISLT_f_BOOL  ||
+        p == &GB_ISGE_f_BOOL  || p == &GB_ISLE_f_BOOL   || p == &GB_LOR_f_BOOL   ||
+        p == &GB_LAND_f_BOOL  || p == &GB_LXOR_f_BOOL   || p == &GB_EQ_f_BOOL    ||
+        p == &GB_NE_f_BOOL    || p == &GB_GT_f_BOOL     || p == &GB_LT_f_BOOL    ||
+        p == &GB_GE_f_BOOL    || p == &GB_LE_f_BOOL     :
+    (t == GB_INT8_code ?
+        p == &GB_FIRST_f_INT8 || p == &GB_SECOND_f_INT8 || p == &GB_MIN_f_INT8   ||
+        p == &GB_MAX_f_INT8   || p == &GB_PLUS_f_INT8   || p == &GB_MINUS_f_INT8 ||
+        p == &GB_TIMES_f_INT8 || p == &GB_DIV_f_INT8    || p == &GB_ISEQ_f_INT8  ||
+        p == &GB_ISNE_f_INT8  || p == &GB_ISGT_f_INT8   || p == &GB_ISLT_f_INT8  ||
+        p == &GB_ISGE_f_INT8  || p == &GB_ISLE_f_INT8   || p == &GB_LOR_f_INT8   ||
+        p == &GB_LAND_f_INT8  || p == &GB_LXOR_f_INT8   || p == &GB_EQ_f_INT8    ||
+        p == &GB_NE_f_INT8    || p == &GB_GT_f_INT8     || p == &GB_LT_f_INT8    ||
+        p == &GB_GE_f_INT8    || p == &GB_LE_f_INT8     :
+    (t == GB_UINT8_code ?
+        p == &GB_FIRST_f_UINT8 || p == &GB_SECOND_f_UINT8 || p == &GB_MIN_f_UINT8   ||
+        p == &GB_MAX_f_UINT8   || p == &GB_PLUS_f_UINT8   || p == &GB_MINUS_f_UINT8 ||
+        p == &GB_TIMES_f_UINT8 || p == &GB_DIV_f_UINT8    || p == &GB_ISEQ_f_UINT8  ||
+        p == &GB_ISNE_f_UINT8  || p == &GB_ISGT_f_UINT8   || p == &GB_ISLT_f_UINT8  ||
+        p == &GB_ISGE_f_UINT8  || p == &GB_ISLE_f_UINT8   || p == &GB_LOR_f_UINT8   ||
+        p == &GB_LAND_f_UINT8  || p == &GB_LXOR_f_UINT8   || p == &GB_EQ_f_UINT8    ||
+        p == &GB_NE_f_UINT8    || p == &GB_GT_f_UINT8     || p == &GB_LT_f_UINT8    ||
+        p == &GB_GE_f_UINT8    || p == &GB_LE_f_UINT8     :
+    (t == GB_INT16_code ?
+        p == &GB_FIRST_f_INT16 || p == &GB_SECOND_f_INT16 || p == &GB_MIN_f_INT16   ||
+        p == &GB_MAX_f_INT16   || p == &GB_PLUS_f_INT16   || p == &GB_MINUS_f_INT16 ||
+        p == &GB_TIMES_f_INT16 || p == &GB_DIV_f_INT16    || p == &GB_ISEQ_f_INT16  ||
+        p == &GB_ISNE_f_INT16  || p == &GB_ISGT_f_INT16   || p == &GB_ISLT_f_INT16  ||
+        p == &GB_ISGE_f_INT16  || p == &GB_ISLE_f_INT16   || p == &GB_LOR_f_INT16   ||
+        p == &GB_LAND_f_INT16  || p == &GB_LXOR_f_INT16   || p == &GB_EQ_f_INT16    ||
+        p == &GB_NE_f_INT16    || p == &GB_GT_f_INT16     || p == &GB_LT_f_INT16    ||
+        p == &GB_GE_f_INT16    || p == &GB_LE_f_INT16     :
+    (t == GB_UINT16_code ?
+        p == &GB_FIRST_f_UINT16 || p == &GB_SECOND_f_UINT16 || p == &GB_MIN_f_UINT16   ||
+        p == &GB_MAX_f_UINT16   || p == &GB_PLUS_f_UINT16   || p == &GB_MINUS_f_UINT16 ||
+        p == &GB_TIMES_f_UINT16 || p == &GB_DIV_f_UINT16    || p == &GB_ISEQ_f_UINT16  ||
+        p == &GB_ISNE_f_UINT16  || p == &GB_ISGT_f_UINT16   || p == &GB_ISLT_f_UINT16  ||
+        p == &GB_ISGE_f_UINT16  || p == &GB_ISLE_f_UINT16   || p == &GB_LOR_f_UINT16   ||
+        p == &GB_LAND_f_UINT16  || p == &GB_LXOR_f_UINT16   || p == &GB_EQ_f_UINT16    ||
+        p == &GB_NE_f_UINT16    || p == &GB_GT_f_UINT16     || p == &GB_LT_f_UINT16    ||
+        p == &GB_GE_f_UINT16    || p == &GB_LE_f_UINT16     :
+    (t == GB_INT32_code ?
+        p == &GB_FIRST_f_INT32 || p == &GB_SECOND_f_INT32 || p == &GB_MIN_f_INT32   ||
+        p == &GB_MAX_f_INT32   || p == &GB_PLUS_f_INT32   || p == &GB_MINUS_f_INT32 ||
+        p == &GB_TIMES_f_INT32 || p == &GB_DIV_f_INT32    || p == &GB_ISEQ_f_INT32  ||
+        p == &GB_ISNE_f_INT32  || p == &GB_ISGT_f_INT32   || p == &GB_ISLT_f_INT32  ||
+        p == &GB_ISGE_f_INT32  || p == &GB_ISLE_f_INT32   || p == &GB_LOR_f_INT32   ||
+        p == &GB_LAND_f_INT32  || p == &GB_LXOR_f_INT32   || p == &GB_EQ_f_INT32    ||
+        p == &GB_NE_f_INT32    || p == &GB_GT_f_INT32     || p == &GB_LT_f_INT32    ||
+        p == &GB_GE_f_INT32    || p == &GB_LE_f_INT32     :
+    (t == GB_UINT32_code ?
+        p == &GB_FIRST_f_UINT32 || p == &GB_SECOND_f_UINT32 || p == &GB_MIN_f_UINT32   ||
+        p == &GB_MAX_f_UINT32   || p == &GB_PLUS_f_UINT32   || p == &GB_MINUS_f_UINT32 ||
+        p == &GB_TIMES_f_UINT32 || p == &GB_DIV_f_UINT32    || p == &GB_ISEQ_f_UINT32  ||
+        p == &GB_ISNE_f_UINT32  || p == &GB_ISGT_f_UINT32   || p == &GB_ISLT_f_UINT32  ||
+        p == &GB_ISGE_f_UINT32  || p == &GB_ISLE_f_UINT32   || p == &GB_LOR_f_UINT32   ||
+        p == &GB_LAND_f_UINT32  || p == &GB_LXOR_f_UINT32   || p == &GB_EQ_f_UINT32    ||
+        p == &GB_NE_f_UINT32    || p == &GB_GT_f_UINT32     || p == &GB_LT_f_UINT32    ||
+        p == &GB_GE_f_UINT32    || p == &GB_LE_f_UINT32     :
+    (t == GB_INT64_code ?
+        p == &GB_FIRST_f_INT64 || p == &GB_SECOND_f_INT64 || p == &GB_MIN_f_INT64   ||
+        p == &GB_MAX_f_INT64   || p == &GB_PLUS_f_INT64   || p == &GB_MINUS_f_INT64 ||
+        p == &GB_TIMES_f_INT64 || p == &GB_DIV_f_INT64    || p == &GB_ISEQ_f_INT64  ||
+        p == &GB_ISNE_f_INT64  || p == &GB_ISGT_f_INT64   || p == &GB_ISLT_f_INT64  ||
+        p == &GB_ISGE_f_INT64  || p == &GB_ISLE_f_INT64   || p == &GB_LOR_f_INT64   ||
+        p == &GB_LAND_f_INT64  || p == &GB_LXOR_f_INT64   || p == &GB_EQ_f_INT64    ||
+        p == &GB_NE_f_INT64    || p == &GB_GT_f_INT64     || p == &GB_LT_f_INT64    ||
+        p == &GB_GE_f_INT64    || p == &GB_LE_f_INT64     :
+    (t == GB_UINT64_code ?
+        p == &GB_FIRST_f_UINT64 || p == &GB_SECOND_f_UINT64 || p == &GB_MIN_f_UINT64   ||
+        p == &GB_MAX_f_UINT64   || p == &GB_PLUS_f_UINT64   || p == &GB_MINUS_f_UINT64 ||
+        p == &GB_TIMES_f_UINT64 || p == &GB_DIV_f_UINT64    || p == &GB_ISEQ_f_UINT64  ||
+        p == &GB_ISNE_f_UINT64  || p == &GB_ISGT_f_UINT64   || p == &GB_ISLT_f_UINT64  ||
+        p == &GB_ISGE_f_UINT64  || p == &GB_ISLE_f_UINT64   || p == &GB_LOR_f_UINT64   ||
+        p == &GB_LAND_f_UINT64  || p == &GB_LXOR_f_UINT64   || p == &GB_EQ_f_UINT64    ||
+        p == &GB_NE_f_UINT64    || p == &GB_GT_f_UINT64     || p == &GB_LT_f_UINT64    ||
+        p == &GB_GE_f_UINT64    || p == &GB_LE_f_UINT64     :
+    (t == GB_FP32_code ?
+        p == &GB_FIRST_f_FP32 || p == &GB_SECOND_f_FP32 || p == &GB_MIN_f_FP32   ||
+        p == &GB_MAX_f_FP32   || p == &GB_PLUS_f_FP32   || p == &GB_MINUS_f_FP32 ||
+        p == &GB_TIMES_f_FP32 || p == &GB_DIV_f_FP32    || p == &GB_ISEQ_f_FP32  ||
+        p == &GB_ISNE_f_FP32  || p == &GB_ISGT_f_FP32   || p == &GB_ISLT_f_FP32  ||
+        p == &GB_ISGE_f_FP32  || p == &GB_ISLE_f_FP32   || p == &GB_LOR_f_FP32   ||
+        p == &GB_LAND_f_FP32  || p == &GB_LXOR_f_FP32   || p == &GB_EQ_f_FP32    ||
+        p == &GB_NE_f_FP32    || p == &GB_GT_f_FP32     || p == &GB_LT_f_FP32    ||
+        p == &GB_GE_f_FP32    || p == &GB_LE_f_FP32     :
+    (t == GB_FP64_code ?
+        p == &GB_FIRST_f_FP64 || p == &GB_SECOND_f_FP64 || p == &GB_MIN_f_FP64   ||
+        p == &GB_MAX_f_FP64   || p == &GB_PLUS_f_FP64   || p == &GB_MINUS_f_FP64 ||
+        p == &GB_TIMES_f_FP64 || p == &GB_DIV_f_FP64    || p == &GB_ISEQ_f_FP64  ||
+        p == &GB_ISNE_f_FP64  || p == &GB_ISGT_f_FP64   || p == &GB_ISLT_f_FP64  ||
+        p == &GB_ISGE_f_FP64  || p == &GB_ISLE_f_FP64   || p == &GB_LOR_f_FP64   ||
+        p == &GB_LAND_f_FP64  || p == &GB_LXOR_f_FP64   || p == &GB_EQ_f_FP64    ||
+        p == &GB_NE_f_FP64    || p == &GB_GT_f_FP64     || p == &GB_LT_f_FP64    ||
+        p == &GB_GE_f_FP64    || p == &GB_LE_f_FP64     :
+        \false
+    ))))))))))) ;
+*/
+
+
 // Separation predicates between different structs/objects/ptrs
 // (not separation of their internal footprints -- see corresponding
 // struct/object section below for separation predicates which determine
@@ -145,11 +309,11 @@
  predicate binaryop_valid{L}(GrB_BinaryOp o) =
     \valid(o) &&
     binaryop_init(o) &&
-    \valid(((char*)binaryop_func(o)) + (0..sizeof(binaryop_func(o))-1)) &&
     binaryop_code_valid(o) &&
     type_valid(binaryop_outtype(o)) &&
     type_valid(binaryop_in1type(o)) &&
     type_valid(binaryop_in2type(o)) &&
+    void_ptr_binary_function_valid(binaryop_func(o),type_code(binaryop_in1type(o))) &&
     binaryop_fp_separated(o) ;
  */
 
@@ -220,6 +384,9 @@
 /* TODO: specification validity for monoid not already checked - binaryop is
          associative, identity is in fact an identity element of the binaryop &
          domain, other algebraic properties of a monoid not checked
+ 
+   TODO: determine whether it is possible to check whether an identity's bits are
+         all zero without performing unsound pointer casts
  */
 
 /*@
@@ -229,11 +396,11 @@
  
  predicate monoid_init{L}(GrB_Monoid m) = magic_valid(m->magic) ;
  
+ // DO NOT CALL THIS FUNCTION UNLESS PERFORMING VALUE ANALYSIS BEFORE WP
+ // WP Typed+cast WILL BE UNSOUND AND Typed ALONE WILL FAIL
  // assumes the monoid's binary op is valid,
  // ie. binaryop_valid(monoid_op(m)) == \true
  // assumes the monoid's identity element can be deferenced
- // ie. \valid(((char*)m->identity) +
- //         (0..(type_size(binaryop_outtype(monoid_op(m))))-1)) == \true
  // internal predicate of monoid_valid
  predicate identity_is_zero_bool_valid{L}(GrB_Monoid m) =
     (m->identity_is_zero == \true ?
@@ -261,9 +428,7 @@
     monoid_init(m) &&
     binaryop_valid(monoid_op(m)) &&
     binaryop_domains_same(monoid_op(m)) &&
-    \valid(((char*)m->identity) +
-        (0..(type_size(binaryop_outtype(monoid_op(m))))-1)) &&
-    identity_is_zero_bool_valid(m) &&
+    void_ptr_valid(monoid_identity(m),type_code(binaryop_outtype(monoid_op(m)))) &&
     monoid_fp_separated(m) ;
  */
 
@@ -361,8 +526,7 @@
          &&
          \valid(m->jpending + (0..(m->max_npending)-1))
          &&
-         \valid(((char*)(m->xpending + (0..(m->max_npending)-1))) +
-            (0..type_size(matrix_type(m))-1))
+         void_ptr_array_valid(m->xpending,type_code(matrix_type(m)),m->max_npending)
          &&
          tuple_indices_in_bounds :
             (\forall int64_t k; 0 <= k < m->npending ==>
@@ -428,8 +592,7 @@
                     (m->p)[j] <= (m->p)[j+1] <= matrix_nvals(m)
                 )
             &&
-            \valid(((char*)(m->x + (0..(matrix_nvals(m))-1))) +
-                (0..type_size(matrix_type(m))-1))
+            void_ptr_array_valid(m->x,type_code(matrix_type(m)),matrix_nvals(m))
             &&
             row_indices_valid(m)
         )
