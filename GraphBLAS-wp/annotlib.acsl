@@ -132,8 +132,12 @@
  predicate binaryop_fp_separated{L}(GrB_BinaryOp o) =
     \separated(o,
                ((char*)o->function) + (0..sizeof(o->function)-1),
-               o->ztype,
-               o->xtype,
+               o->ztype) &&
+    \separated(o,
+               ((char*)o->function) + (0..sizeof(o->function)-1),
+               o->xtype) &&
+    \separated(o,
+               ((char*)o->function) + (0..sizeof(o->function)-1),
                o->ytype) ;
  */
 
@@ -225,7 +229,7 @@
  
  logic set<char*> monoid_fp{L}(GrB_Monoid m) =
     \union(m,
-           binaryop_fp(m->op),
+           m->op,
            ((char*)m->identity) + (0..(m->op->ztype->size)-1)) ;
  
  predicate monoid_init{L}(GrB_Monoid m) = magic_valid(m->magic) ;
@@ -252,7 +256,7 @@
  
  predicate monoid_fp_separated{L}(GrB_Monoid m) =
     \separated(m,
-               binaryop_fp(m->op),
+               m->op,
                ((char*)m->identity) + (0..(m->op->ztype->size)-1)) ;
  */
 
@@ -286,15 +290,15 @@
  
  logic set<char*> semiring_fp{L}(GrB_Semiring s) =
     \union(s,
-           monoid_fp(s->add),
-           binaryop_fp(s->multiply)) ;
+           s->add,
+           s->multiply) ;
  
  predicate semiring_init{L}(GrB_Semiring s) = magic_valid(s->magic) ;
  
  predicate semiring_fp_separated{L}(GrB_Semiring s) =
     \separated(s,
-               monoid_fp(s->add),
-               binaryop_fp(s->multiply)) ;
+               s->add,
+               s->multiply) ;
  */
 
 /*@
@@ -333,7 +337,7 @@
            m->ipending + (0..(m->max_npending)-1),
            m->jpending + (0..(m->max_npending)-1),
            ((char*)(m->xpending + (0..(m->max_npending)-1))) + (0..(m->type->size)-1),
-           binaryop_fp(m->operator_pending),
+           m->operator_pending,
            ((GrB_Matrix)m->queue_next),
            ((GrB_Matrix)m->queue_prev)) ;
  
@@ -467,7 +471,7 @@
                m->ipending + (0..(m->max_npending)-1),
                m->jpending + (0..(m->max_npending)-1),
                ((char*)(m->xpending + (0..(m->max_npending)-1))) + (0..(m->type->size)-1),
-               binaryop_fp(m->operator_pending),
+               m->operator_pending,
                ((GrB_Matrix)m->queue_next),
                ((GrB_Matrix)m->queue_prev)) ;
  */
