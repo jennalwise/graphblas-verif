@@ -114,7 +114,7 @@
  
  logic set<char*> binaryop_fp{L}(GrB_BinaryOp o) =
     \union(o,
-           ((char*)o->function) + (0..sizeof(o->function)-1),
+           ((char*)o->function) + (0..sizeof(*(o->function))-1),
            o->ztype,
            o->xtype,
            o->ytype) ;
@@ -131,13 +131,13 @@
  
  predicate binaryop_fp_separated{L}(GrB_BinaryOp o) =
     \separated(o,
-               ((char*)o->function) + (0..sizeof(o->function)-1),
+               ((char*)o->function) + (0..sizeof(*(o->function))-1),
                o->ztype) &&
     \separated(o,
-               ((char*)o->function) + (0..sizeof(o->function)-1),
+               ((char*)o->function) + (0..sizeof(*(o->function))-1),
                o->xtype) &&
     \separated(o,
-               ((char*)o->function) + (0..sizeof(o->function)-1),
+               ((char*)o->function) + (0..sizeof(*(o->function))-1),
                o->ytype) ;
  */
 
@@ -145,7 +145,7 @@
  predicate binaryop_valid{L}(GrB_BinaryOp o) =
     \valid(o) &&
     binaryop_init(o) &&
-    \valid(((char*)binaryop_func(o)) + (0..sizeof(binaryop_func(o))-1)) &&
+    \valid(((char*)binaryop_func(o)) + (0..sizeof(*binaryop_func(o))-1)) &&
     binaryop_code_valid(o) &&
     type_valid(binaryop_outtype(o)) &&
     type_valid(binaryop_in1type(o)) &&
