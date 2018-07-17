@@ -25,17 +25,6 @@
  predicate magic_valid(int64_t magic) = magic == 0x00981B0787374E72 ;
  */
 
-// Separation predicates between different structs/objects/ptrs
-// (not separation of their internal footprints -- see corresponding
-// struct/object section below for separation predicates which determine
-// if a/an struct/object's footprint is separated).
-// These predicates are written as needed.
-// Forced to do this, this way, because WP doesn't support heterogenuous casts
-// of pointers at this time and to ensure ecapsulation of structs'/objects' internal
-// representations.
-
-/* TODO: write separation predicates as I annotate methods/bfs app */
-
 //------------------------------------------------------------------------------
 // GrB_Type
 //------------------------------------------------------------------------------
@@ -122,6 +111,13 @@
  logic GrB_Type binaryop_in1type{L}(GrB_BinaryOp o) = o->xtype ;
  
  logic GrB_Type binaryop_in2type{L}(GrB_BinaryOp o) = o->ytype ;
+ 
+ logic set<char*> binaryop_fp{L}(GrB_BinaryOp o) =
+    \union(o,
+           ((char*)o->function) + (0..sizeof(o->function)-1),
+           o->ztype,
+           o->xtype,
+           o->ytype) ;
  
  predicate binaryop_init{L}(GrB_BinaryOp o) = magic_valid(o->magic) ;
  
@@ -227,12 +223,17 @@
  
  logic void* monoid_identity{L}(GrB_Monoid m) = m->identity ;
  
+ logic set<char*> monoid_fp{L}(GrB_Monoid m) =
+    \union(m,
+           binaryop_fp(m->op),
+           ((char*)m->identity) + (0..(m->op->ztype->size)-1)) ;
+ 
  predicate monoid_init{L}(GrB_Monoid m) = magic_valid(m->magic) ;
  
  // assumes the monoid's binary op is valid,
  // ie. binaryop_valid(monoid_op(m)) == \true
  // assumes the monoid's identity element can be deferenced
- // ie. \valid(((char*)m->identity) +
+ // ie. \valid(((char*)monoid_identity(m)) +
  //         (0..(type_size(binaryop_outtype(monoid_op(m))))-1)) == \true
  // internal predicate of monoid_valid
  predicate identity_is_zero_bool_valid{L}(GrB_Monoid m) =
@@ -251,7 +252,7 @@
  
  predicate monoid_fp_separated{L}(GrB_Monoid m) =
     \separated(m,
-               m->op,
+               binaryop_fp(m->op),
                ((char*)m->identity) + (0..(m->op->ztype->size)-1)) ;
  */
 
@@ -261,7 +262,7 @@
     monoid_init(m) &&
     binaryop_valid(monoid_op(m)) &&
     binaryop_domains_same(monoid_op(m)) &&
-    \valid(((char*)m->identity) +
+    \valid(((char*)monoid_identity(m)) +
         (0..(type_size(binaryop_outtype(monoid_op(m))))-1)) &&
     identity_is_zero_bool_valid(m) &&
     monoid_fp_separated(m) ;
@@ -283,12 +284,17 @@
  
  logic GrB_BinaryOp semiring_mult{L}(GrB_Semiring s) = s->multiply ;
  
+ logic set<char*> semiring_fp{L}(GrB_Semiring s) =
+    \union(s,
+           monoid_fp(s->add),
+           binaryop_fp(s->multiply)) ;
+ 
  predicate semiring_init{L}(GrB_Semiring s) = magic_valid(s->magic) ;
  
  predicate semiring_fp_separated{L}(GrB_Semiring s) =
     \separated(s,
-               s->add,
-               s->multiply) ;
+               monoid_fp(s->add),
+               binaryop_fp(s->multiply)) ;
  */
 
 /*@
@@ -317,6 +323,19 @@
  logic int64_t matrix_nvals{L}(GrB_Matrix m) = m->nzmax ;
  
  logic GrB_Type matrix_type{L}(GrB_Matrix m) = m->type ;
+ 
+ logic set<char*> matrix_fp{L}(GrB_Matrix m) =
+    \union(m,
+           m->type,
+           m->p + (0..(m->ncols+1)-1),
+           m->i + (0..(m->nzmax)-1),
+           ((char*)(m->x + (0..(m->nzmax)-1))) + (0..(m->type->size)-1),
+           m->ipending + (0..(m->max_npending)-1),
+           m->jpending + (0..(m->max_npending)-1),
+           ((char*)(m->xpending + (0..(m->max_npending)-1))) + (0..(m->type->size)-1),
+           binaryop_fp(m->operator_pending),
+           ((GrB_Matrix)m->queue_next),
+           ((GrB_Matrix)m->queue_prev)) ;
  
  predicate matrix_init{L}(GrB_Matrix m) = magic_valid(m->magic) ;
  
@@ -448,9 +467,9 @@
                m->ipending + (0..(m->max_npending)-1),
                m->jpending + (0..(m->max_npending)-1),
                ((char*)(m->xpending + (0..(m->max_npending)-1))) + (0..(m->type->size)-1),
-               m->operator_pending,
-               ((char*)m->queue_next) + (0..sizeof(GrB_Matrix)-1),
-               ((char*)m->queue_prev) + (0..sizeof(GrB_Matrix)-1)) ;
+               binaryop_fp(m->operator_pending),
+               ((GrB_Matrix)m->queue_next),
+               ((GrB_Matrix)m->queue_prev)) ;
  */
 
 /*@
@@ -490,6 +509,8 @@
  logic int64_t vector_nvals{L}(GrB_Vector v) = v->nzmax ;
  
  logic GrB_Type vector_type{L}(GrB_Vector v) = v->type ;
+ 
+ logic set<char*> vector_fp{L}(GrB_Vector v) = matrix_fp((GrB_Matrix)v) ;
  */
 
 /*@
