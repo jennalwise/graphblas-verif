@@ -13,7 +13,7 @@
 // *** JENNA ANNOTATION 6/27/18 -- start of annotations ***
 
 #include "demos.h"
-#include "annotlib.acsl" // for useful common/factored out annotations
+#include "annotlib.h" // for useful common/factored out annotations
 
 //------------------------------------------------------------------------------
 // bfs5m: breadth first search using a Boolean semiring
