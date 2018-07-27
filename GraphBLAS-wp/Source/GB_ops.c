@@ -8,7 +8,7 @@
 // *** JENNA CHANGE 7/27/18 ***
 // HUGE_VAL and HUGE_VALF are equiv to INFINITY and are supported by Frama-C math.h
 // Added TYPE_code def to support non-generic macros in GB_ops_template.c
-// Commented out all monoids, ops, and semirings that I don't want for testing verification
+// Commented out all types, monoids, ops, and semirings that I don't want for testing verification
 
 //------------------------------------------------------------------------------
 
@@ -23,31 +23,35 @@
 
 // extern predefined type objects but opaque to the user
 struct GB_Type_opaque
-GB_opaque_BOOL   = { MAGIC, sizeof (bool),     GB_BOOL_code   , "bool"     },
+/*GB_opaque_BOOL   = { MAGIC, sizeof (bool),     GB_BOOL_code   , "bool"     },
 GB_opaque_INT8   = { MAGIC, sizeof (int8_t),   GB_INT8_code   , "int8_t"   },
 GB_opaque_UINT8  = { MAGIC, sizeof (uint8_t),  GB_UINT8_code  , "uint8_t"  },
 GB_opaque_INT16  = { MAGIC, sizeof (int16_t),  GB_INT16_code  , "int16_t"  },
 GB_opaque_UINT16 = { MAGIC, sizeof (uint16_t), GB_UINT16_code , "uint16_t" },
-GB_opaque_INT32  = { MAGIC, sizeof (int32_t),  GB_INT32_code  , "int32_t"  },
-GB_opaque_UINT32 = { MAGIC, sizeof (uint32_t), GB_UINT32_code , "uint32_t" },
+ */
+GB_opaque_INT32  = { MAGIC, sizeof (int32_t),  GB_INT32_code  , "int32_t"  } ;
+/*GB_opaque_UINT32 = { MAGIC, sizeof (uint32_t), GB_UINT32_code , "uint32_t" },
 GB_opaque_INT64  = { MAGIC, sizeof (int64_t),  GB_INT64_code  , "int64_t"  },
 GB_opaque_UINT64 = { MAGIC, sizeof (uint64_t), GB_UINT64_code , "uint64_t" },
 GB_opaque_FP32   = { MAGIC, sizeof (float),    GB_FP32_code   , "float"    },
 GB_opaque_FP64   = { MAGIC, sizeof (double),   GB_FP64_code   , "double"   } ;
+ */
 
 // extern predefined types (handles to opaque types)
 GrB_Type
-    GrB_BOOL   = &GB_opaque_BOOL,
+    /*GrB_BOOL   = &GB_opaque_BOOL,
     GrB_INT8   = &GB_opaque_INT8,
     GrB_UINT8  = &GB_opaque_UINT8,
     GrB_INT16  = &GB_opaque_INT16,
     GrB_UINT16 = &GB_opaque_UINT16,
-    GrB_INT32  = &GB_opaque_INT32,
-    GrB_UINT32 = &GB_opaque_UINT32,
+     */
+    GrB_INT32  = &GB_opaque_INT32 ;
+    /*GrB_UINT32 = &GB_opaque_UINT32,
     GrB_INT64  = &GB_opaque_INT64,
     GrB_UINT64 = &GB_opaque_UINT64,
     GrB_FP32   = &GB_opaque_FP32,
     GrB_FP64   = &GB_opaque_FP64 ;
+     */
 
 //------------------------------------------------------------------------------
 // built-in unary and binary operators
