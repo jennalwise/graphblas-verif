@@ -14,6 +14,9 @@
 //      --used TYPE_code since types of x and y are both TYPE (sometimes z too)
 // Changed use of IMINV macro definition to match new definition
 
+// *** JENNA CHANGE 7/27/18 ***
+// Commented out all ops that I don't want for testing verification
+
 //------------------------------------------------------------------------------
 
 // This file is #include'd many times in GB_builtin.c to define the built-in
@@ -37,99 +40,109 @@
 // See Source/GB.h for discussion of special cases for MINV, MIN, MAX, and DIV.
 
 // 6 unary functions z=f(x), where z and x have the same type
-void GB (ONE_f)      (Z_X_ARGS) { Z = 1 ; }
+/*void GB (ONE_f)      (Z_X_ARGS) { Z = 1 ; }
 void GB (IDENTITY_f) (Z_X_ARGS) { Z = X ; }
-
+*/
 #ifdef FLOATING_POINT
 // floating-point
-void GB (AINV_f)     (Z_X_ARGS) { Z = -X ; }
+/*void GB (AINV_f)     (Z_X_ARGS) { Z = -X ; }
 void GB (ABS_f)      (Z_X_ARGS) { Z = FABS (X) ; }
 void GB (MINV_f)     (Z_X_ARGS) { Z = 1. / (X) ; }  // floating-point 1/x
+*/
 #else
 #ifdef BOOLEAN
 // boolean
-void GB (AINV_f)     (Z_X_ARGS) { Z = X ; }
+/*void GB (AINV_f)     (Z_X_ARGS) { Z = X ; }
 void GB (ABS_f)      (Z_X_ARGS) { Z = X ; }
 void GB (MINV_f)     (Z_X_ARGS) { Z = true ; }  // see comments in Source/GB.h
+*/
 #else
 #ifdef UNSIGNED
 // unsigned integer
-void GB (AINV_f)     (Z_X_ARGS) { Z = -X ; }    // modulo wrap is intentional
+/*void GB (AINV_f)     (Z_X_ARGS) { Z = -X ; }    // modulo wrap is intentional
 void GB (ABS_f)      (Z_X_ARGS) { Z = X ; }
 void GB (MINV_f)     (Z_X_ARGS) { Z = IMINV (X,TYPE_code) ; }
+ */
 #else
 // signed integer
-void GB (AINV_f)     (Z_X_ARGS) { Z = -X ; }
+/*void GB (AINV_f)     (Z_X_ARGS) { Z = -X ; }
 void GB (ABS_f)      (Z_X_ARGS) { Z = IABS (X) ; }
 void GB (MINV_f)     (Z_X_ARGS) { Z = IMINV (X,TYPE_code) ; }
+ */
 #endif
 #endif
 #endif
 
 #ifdef BOOLEAN
-void GB (LNOT_f)     (Z_X_ARGS) { Z = ! X ; }
+//void GB (LNOT_f)     (Z_X_ARGS) { Z = ! X ; }
 #else
-void GB (LNOT_f)     (Z_X_ARGS) { Z = ! (X != 0) ; }
+//void GB (LNOT_f)     (Z_X_ARGS) { Z = ! (X != 0) ; }
 #endif
 
 // 8 binary functions z=f(x,y) where x,y,z have the same type
-void GB (FIRST_f)  (Z_X_Y_ARGS) { Z = X ; }
+/*void GB (FIRST_f)  (Z_X_Y_ARGS) { Z = X ; }
 void GB (SECOND_f) (Z_X_Y_ARGS) { Z = Y ; }
+ */
 #ifdef FLOATING_POINT
-void GB (MIN_f)    (Z_X_Y_ARGS) { Z = FMIN (X,Y) ; }    // special NaN cases
+/*void GB (MIN_f)    (Z_X_Y_ARGS) { Z = FMIN (X,Y) ; }    // special NaN cases
 void GB (MAX_f)    (Z_X_Y_ARGS) { Z = FMAX (X,Y) ; }
+ */
 #else
-void GB (MIN_f)    (Z_X_Y_ARGS) { Z = IMIN (X,Y) ; }
+/*void GB (MIN_f)    (Z_X_Y_ARGS) { Z = IMIN (X,Y) ; }
 void GB (MAX_f)    (Z_X_Y_ARGS) { Z = IMAX (X,Y) ; }
+ */
 #endif
 void GB (PLUS_f)   (Z_X_Y_ARGS) { Z = X + Y ; }
-void GB (MINUS_f)  (Z_X_Y_ARGS) { Z = X - Y ; }
+//void GB (MINUS_f)  (Z_X_Y_ARGS) { Z = X - Y ; }
 void GB (TIMES_f)  (Z_X_Y_ARGS) { Z = X * Y ; }
 #ifdef FLOATING_POINT
-void GB (DIV_f)    (Z_X_Y_ARGS) { Z = X / Y ; } // floating-point division
+//void GB (DIV_f)    (Z_X_Y_ARGS) { Z = X / Y ; } // floating-point division
 #else
 #ifdef BOOLEAN
-void GB (DIV_f)    (Z_X_Y_ARGS) { Z = X ; }     // see comments in Source/GB.h
+//void GB (DIV_f)    (Z_X_Y_ARGS) { Z = X ; }     // see comments in Source/GB.h
 #else
-void GB (DIV_f)    (Z_X_Y_ARGS) { Z = IDIV (X,Y,TYPE_code) ; }    // int* and uint* only
+//void GB (DIV_f)    (Z_X_Y_ARGS) { Z = IDIV (X,Y,TYPE_code) ; }    // int* and uint* only
 #endif
 #endif
 
 // 6 binary comparison functions z=f(x,y), where x,y,z have the same type
-void GB (ISEQ_f)   (Z_X_Y_ARGS) { Z = (X == Y) ; }
+/*void GB (ISEQ_f)   (Z_X_Y_ARGS) { Z = (X == Y) ; }
 void GB (ISNE_f)   (Z_X_Y_ARGS) { Z = (X != Y) ; }
 void GB (ISGT_f)   (Z_X_Y_ARGS) { Z = (X >  Y) ; }
 void GB (ISLT_f)   (Z_X_Y_ARGS) { Z = (X <  Y) ; }
 void GB (ISGE_f)   (Z_X_Y_ARGS) { Z = (X >= Y) ; }
 void GB (ISLE_f)   (Z_X_Y_ARGS) { Z = (X <= Y) ; }
-
+*/
 // 3 boolean binary functions z=f(x,y), all x,y,z the same type
 #ifdef BOOLEAN
-void GB (LOR_f)    (Z_X_Y_ARGS) { Z = (X || Y) ; }
+/*void GB (LOR_f)    (Z_X_Y_ARGS) { Z = (X || Y) ; }
 void GB (LAND_f)   (Z_X_Y_ARGS) { Z = (X && Y) ; }
 void GB (LXOR_f)   (Z_X_Y_ARGS) { Z = (X != Y) ; }
+ */
 #else
 // The inputs are of type T but are then implicitly converted to boolean
 // The output z is of type T, either 1 or 0 in that type.
-void GB (LOR_f)    (Z_X_Y_ARGS) { Z = ((X != 0) || (Y != 0)) ; }
+/*void GB (LOR_f)    (Z_X_Y_ARGS) { Z = ((X != 0) || (Y != 0)) ; }
 void GB (LAND_f)   (Z_X_Y_ARGS) { Z = ((X != 0) && (Y != 0)) ; }
 void GB (LXOR_f)   (Z_X_Y_ARGS) { Z = ((X != 0) != (Y != 0)) ; }
+ */
 #endif
 
 // 6 binary functions z=f(x,y) for any built-in type but return bool
-void GB (EQ_f) (Zbool_X_Y_ARGS) { Z = (X == Y) ; }
+/*void GB (EQ_f) (Zbool_X_Y_ARGS) { Z = (X == Y) ; }
 void GB (NE_f) (Zbool_X_Y_ARGS) { Z = (X != Y) ; }
 void GB (GT_f) (Zbool_X_Y_ARGS) { Z = (X >  Y) ; }
 void GB (LT_f) (Zbool_X_Y_ARGS) { Z = (X <  Y) ; }
 void GB (GE_f) (Zbool_X_Y_ARGS) { Z = (X >= Y) ; }
 void GB (LE_f) (Zbool_X_Y_ARGS) { Z = (X <= Y) ; }
+ */
 
 //------------------------------------------------------------------------------
 // define the GraphBLAS operators
 //------------------------------------------------------------------------------
 
 // 6 unary operators z=f(x), z and x the same type
-UNARY (GxB_, ONE,      "one") ;
+/*UNARY (GxB_, ONE,      "one") ;
 UNARY (GrB_, IDENTITY, "identity") ;
 UNARY (GrB_, AINV,     "ainv") ;
 UNARY (GxB_, ABS,      "abs") ;
@@ -141,10 +154,11 @@ BINARY (GrB_, FIRST,  "first") ;
 BINARY (GrB_, SECOND, "second") ;
 BINARY (GrB_, MIN,    "min") ;
 BINARY (GrB_, MAX,    "max") ;
+*/
 BINARY (GrB_, PLUS,   "plus") ;
-BINARY (GrB_, MINUS,  "minus") ;
+//BINARY (GrB_, MINUS,  "minus") ;
 BINARY (GrB_, TIMES,  "times") ;
-BINARY (GrB_, DIV,    "div") ;
+/*BINARY (GrB_, DIV,    "div") ;
 
 // 6 binary comparison operators z=f(x,y) where x,y,z are all the same type
 BINARY (GxB_, ISEQ,  "iseq") ;
@@ -166,7 +180,7 @@ BINARY_BOOL (GrB_, GT, "gt") ;
 BINARY_BOOL (GrB_, LT, "lt") ;
 BINARY_BOOL (GrB_, GE, "ge") ;
 BINARY_BOOL (GrB_, LE, "le") ;
-
+*/
 //------------------------------------------------------------------------------
 // define unary typecast operators, used in GB_cast_factory.c
 //------------------------------------------------------------------------------
@@ -190,18 +204,19 @@ BINARY_BOOL (GrB_, LE, "le") ;
         CAST ((*((TYPE *) z)) , (*((const xtype *) x)) , TYPE_code , xcode) ;\
     }
 
-void CAST_NAME (bool    ) CAST_FUNCTION (bool     , GB_BOOL_code  )
+/*void CAST_NAME (bool    ) CAST_FUNCTION (bool     , GB_BOOL_code  )
 void CAST_NAME (int8_t  ) CAST_FUNCTION (int8_t   , GB_INT8_code  )
 void CAST_NAME (uint8_t ) CAST_FUNCTION (uint8_t  , GB_UINT8_code )
 void CAST_NAME (int16_t ) CAST_FUNCTION (int16_t  , GB_INT16_code )
 void CAST_NAME (uint16_t) CAST_FUNCTION (uint16_t , GB_UINT16_code)
+ */
 void CAST_NAME (int32_t ) CAST_FUNCTION (int32_t  , GB_INT32_code )
-void CAST_NAME (uint32_t) CAST_FUNCTION (uint32_t , GB_UINT32_code)
+/*void CAST_NAME (uint32_t) CAST_FUNCTION (uint32_t , GB_UINT32_code)
 void CAST_NAME (int64_t ) CAST_FUNCTION (int64_t  , GB_INT64_code )
 void CAST_NAME (uint64_t) CAST_FUNCTION (uint64_t , GB_UINT64_code)
 void CAST_NAME (float   ) CAST_FUNCTION (float    , GB_FP32_code  )
 void CAST_NAME (double  ) CAST_FUNCTION (double   , GB_FP64_code  )
-
+*/
 #undef X
 #undef Y
 #undef Z
