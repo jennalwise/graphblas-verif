@@ -393,7 +393,7 @@
                     ((matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k])) ==
                         (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k+1]))
                       &&
-                     (m->ipending)[k] <= (m->ipending)[k+1])
+                     ((m->ipending)[k] <= (m->ipending)[k+1])
                     )
                 ) :
                 !(\forall int64_t k; 0 <= k < m->npending-1 ==>
@@ -403,7 +403,7 @@
                     ((matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k])) ==
                         (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k+1]))
                       &&
-                     (m->ipending)[k] <= (m->ipending)[k+1])
+                     ((m->ipending)[k] <= (m->ipending)[k+1])
                     )
                 )
             )
