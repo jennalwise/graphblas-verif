@@ -9,6 +9,10 @@
 // *** JENNA CHANGE 6/22/18 ***
 // Commented out the use of openmp #pragmas
 // Frama-C does not support openmp #pragmas
+// Commented out update of global malloc tracking to simplify verification annotations
+
+// *** JENNA ANNOTATION 7/28/18 ***
+// GB_free_memory
 
 //------------------------------------------------------------------------------
 
@@ -18,7 +22,23 @@
 // is mxFree.  It can also be defined at compile time with -DFREE=myfreefunc.
 
 #include "GB.h"
+#include "annotlib.h" // for common predicates & logic functions
 
+/*@
+ behavior p_null :
+    assumes p == \null ;
+    frees \nothing ;
+    assigns \nothing ;
+    ensures p == \null ;
+ behavior p_not_null :
+    assumes p != \null ;
+    requires \freeable(p) ;
+    frees p ;
+    assigns __fc_heap_status ;
+    ensures \allocable(p) ;
+ complete behaviors ;
+ disjoint behaviors ;
+ */
 void GB_free_memory
 (
     void *p,                // pointer to allocated block of memory to free
@@ -29,7 +49,7 @@ void GB_free_memory
     if (p != NULL)
     {
         // at least one item is always allocated
-        nitems = IMAX (1, nitems) ;
+ /*       nitems = IMAX (1, nitems) ;
         int nmalloc ;
 
         // #pragma omp critical (GB_memory)
@@ -47,9 +67,9 @@ void GB_free_memory
             printf ("%d free    %p negative mallocs!\n", nmalloc, p) ;
         }
 #endif
-
+*/
         FREE (p) ;
-        ASSERT (nmalloc >= 0) ;
+ //       ASSERT (nmalloc >= 0) ;
     }
 }
 

@@ -459,6 +459,16 @@
                m->operator_pending,
                ((GrB_Matrix)m->queue_next),
                ((GrB_Matrix)m->queue_prev)) ;
+ 
+ predicate matrix_malloc_init{L}(GrB_Matrix m) = m->magic == 0x10981B0787374E72 ;
+ 
+ predicate freeable_storage{L}(GrB_Matrix m) =
+    (!(m->p_shallow) ==> \freeable(m->p)) &&
+    (!(m->i_shallow) ==> \freeable(m->i)) &&
+    (!(m->x_shallow) ==> \freeable(m->x)) &&
+    \freeable(m->ipending) &&
+    \freeable(m->jpending) &&
+    \freeable(m->xpending) ;
  */
 
 /*@

@@ -10,10 +10,35 @@
 // Commented out the use of openmp #pragmas
 // Frama-C does not support openmp #pragmas
 
+// *** JENNA CHANGE 7/28/18 ***
+// Commented update to global queue, because not doing verification on matrix queue
+// nor global struct
+
 //------------------------------------------------------------------------------
 
 #include "GB.h"
+#include "annotlib.h" // for common predicates & logic functions
 
+/*@
+ requires A != \null ;
+ requires \valid(A) ;
+ 
+ assigns A->queue_prev ;
+ assigns A->queue_next ;
+ assigns A->enqueued ;
+ 
+ ensures A->queue_prev == \null ;
+ ensures A->queue_next == \null ;
+ ensures A->enqueued == \false ;
+ 
+ behavior matrix_invalid :
+    assumes !matrix_valid(A) ;
+    ensures \true ;
+ 
+ behavior matrix_valid :
+    assumes matrix_valid(A) ;
+    ensures matrix_valid(A) ;
+ */
 void GB_queue_remove            // remove matrix from queue
 (
     GrB_Matrix A                // matrix to remove
@@ -38,7 +63,7 @@ void GB_queue_remove            // remove matrix from queue
             // check again to be safe, and remove A from the queue
             if (A->enqueued)
             {
-                GrB_Matrix Prev = (GrB_Matrix) (A->queue_prev) ;
+               /* GrB_Matrix Prev = (GrB_Matrix) (A->queue_prev) ;
                 GrB_Matrix Next = (GrB_Matrix) (A->queue_next) ;
                 if (Prev == NULL)
                 {
@@ -54,7 +79,7 @@ void GB_queue_remove            // remove matrix from queue
                 {
                     // update the previous link of the next matrix, if any
                     Next->queue_prev = Prev ;
-                }
+                }*/
                 // A has been removed from the queue
                 A->queue_prev = NULL ;
                 A->queue_next = NULL ;
