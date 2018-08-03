@@ -29,11 +29,11 @@
     requires A->nzombies >= 0 ;
     requires type_valid(matrix_type(A)) ;
     requires matrix_fp_separated(A) ;
-    requires !(A->i_shallow) ==> \freeable(A->i) ;
-    requires !(A->x_shallow) ==> \freeable(A->x) ;
-    requires \freeable(A->ipending) ;
-    requires \freeable(A->jpending) ;
-    requires \freeable(A->xpending) ;
+    requires (!(A->i_shallow) && A->i != \null ==> \freeable(A->i)) ;
+    requires (!(A->x_shallow) && A->x != \null ==> \freeable(A->x)) ;
+    requires (A->ipending != \null ==> \freeable(A->ipending)) ;
+    requires (A->jpending != \null ==> \freeable(A->jpending)) ;
+    requires (A->xpending != \null ==> \freeable(A->xpending)) ;
  
     frees A->i ;
     frees A->x ;
@@ -87,11 +87,11 @@
  
     requires A->npending >= 0 ;
     requires A->nzombies >= 0 ;
-    requires !(A->i_shallow) ==> \freeable(A->i) ;
-    requires !(A->x_shallow) ==> \freeable(A->x) ;
-    requires \freeable(A->ipending) ;
-    requires \freeable(A->jpending) ;
-    requires \freeable(A->xpending) ;
+    requires (!(A->i_shallow) && A->i != \null ==> \freeable(A->i)) ;
+    requires (!(A->x_shallow) && A->x != \null ==> \freeable(A->x)) ;
+    requires (A->ipending != \null ==> \freeable(A->ipending)) ;
+    requires (A->jpending != \null ==> \freeable(A->jpending)) ;
+    requires (A->xpending != \null ==> \freeable(A->xpending)) ;
  
     frees A->i ;
     frees A->x ;

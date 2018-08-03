@@ -23,6 +23,13 @@
 
 /*@
  predicate magic_valid(int64_t magic) = magic == 0x00981B0787374E72 ;
+ 
+ predicate plus_mult_overflow{L}(size_t a, size_t b) =
+    (a != 0 && b != 0 && a > SIZE_MAX / 2) ||
+    (a != 0 && b != 0 && b > SIZE_MAX / 2) ||
+    (0 < a <= SIZE_MAX / 2 &&
+     0 < b <= SIZE_MAX / 2 &&
+     (a + b) > (SIZE_MAX / \min(a,b))) ;
  */
 
 //------------------------------------------------------------------------------
@@ -463,12 +470,12 @@
  predicate matrix_malloc_init{L}(GrB_Matrix m) = m->magic == 0x10981B0787374E72 ;
  
  predicate freeable_storage{L}(GrB_Matrix m) =
-    (!(m->p_shallow) ==> \freeable(m->p)) &&
-    (!(m->i_shallow) ==> \freeable(m->i)) &&
-    (!(m->x_shallow) ==> \freeable(m->x)) &&
-    \freeable(m->ipending) &&
-    \freeable(m->jpending) &&
-    \freeable(m->xpending) ;
+    (!(m->p_shallow) && m->p != \null ==> \freeable(m->p)) &&
+    (!(m->i_shallow) && m->i != \null ==> \freeable(m->i)) &&
+    (!(m->x_shallow) && m->x != \null ==> \freeable(m->x)) &&
+    (m->ipending != \null ==> \freeable(m->ipending)) &&
+    (m->jpending != \null ==> \freeable(m->jpending)) &&
+    (m->xpending != \null ==> \freeable(m->xpending)) ;
  */
 
 /*@

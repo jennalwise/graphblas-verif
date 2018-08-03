@@ -10,6 +10,13 @@
 // Commented out the use of openmp #pragmas
 // Frama-C does not support openmp #pragmas
 
+// *** JENNA CHANGE 7/29/18 ***
+// Commented out update of GB_Global struct and malloc checking for it
+// Not verifying GB_Global struct
+
+// *** JENNA ANNOTATION 7/29/18 ***
+// GB_calloc_memory
+
 //------------------------------------------------------------------------------
 
 // A wrapper for CALLOC.  Space is set to zero.
@@ -24,7 +31,28 @@
 // -DCALLOC=mycallocfunc.
 
 #include "GB.h"
+#include "annotlib.h" // for common predicates & logic functions
 
+/*@
+ behavior inputs_invalid :
+    assumes plus_mult_overflow(nitems,size_of_item) ||
+            nitems > ((GrB_Index)(1ULL << 60))      ||
+            size_of_item > ((GrB_Index)(1ULL << 60)) ;
+    allocates \nothing ;
+    assigns \result ;
+    ensures \result == \null ;
+ behavior inputs_valid :
+    assumes !plus_mult_overflow(nitems,size_of_item) ;
+    assumes nitems <= ((GrB_Index)(1ULL << 60)) ;
+    assumes size_of_item <= ((GrB_Index)(1ULL << 60)) ;
+    allocates \result ;
+    assigns __fc_heap_status ;
+    assigns \result ;
+    ensures (\result == \null || \result != \null) ;
+    ensures (\result != \null ==> \fresh(\result,nitems * size_of_item)) ;
+ complete behaviors ;
+ disjoint behaviors ;
+ */
 void *GB_calloc_memory      // pointer to allocated block of memory
 (
     size_t nitems,          // number of items to allocate
@@ -54,7 +82,7 @@ void *GB_calloc_memory      // pointer to allocated block of memory
         // check the malloc debug status.  This debug flag is set outside
         // of GraphBLAS and not modified, so it is safe to check it outside
         // a critical section.
-        bool pretend_to_fail = false ;
+        /*bool pretend_to_fail = false ;
         if (GB_Global.malloc_debug)
         {
             // brutal malloc debug; pretend to fail if the count <= 0
@@ -69,9 +97,9 @@ void *GB_calloc_memory      // pointer to allocated block of memory
             p = NULL ;
         }
         else
-        {
+        {*/
             p = (void *) CALLOC (nitems, size_of_item) ;
-        }
+        /*}
 
         if (p != NULL)
         {
@@ -87,7 +115,7 @@ void *GB_calloc_memory      // pointer to allocated block of memory
                 p, nmalloc, GB_Global.malloc_debug,
                 (int64_t) nitems, (int64_t) size_of_item) ;
 #endif
-        }
+        }*/
     }
     return (p) ;
 }

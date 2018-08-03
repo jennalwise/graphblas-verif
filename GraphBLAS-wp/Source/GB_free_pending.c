@@ -18,9 +18,9 @@
  requires \valid(A) ;
  requires type_valid(matrix_type(A)) ;
  requires matrix_fp_separated(A) ;
- requires \freeable(A->ipending) ;
- requires \freeable(A->jpending) ;
- requires \freeable(A->xpending) ;
+ requires (A->ipending != \null ==> \freeable(A->ipending)) ;
+ requires (A->jpending != \null ==> \freeable(A->jpending)) ;
+ requires (A->xpending != \null ==> \freeable(A->xpending)) ;
  
  frees A->ipending ;
  frees A->jpending ;

@@ -27,6 +27,14 @@
 // IDIV also in GB_ops_template.c only -- all fixed
 // IMINV also in GB_ops_template.c and GB_transpose_op.c only -- all fixed
 
+// *** JENNA CHANGE 7/25/18 ***
+// removed following line from ERROR due to use of variadic function
+// snprintf s ,                        \
+// the variadic plug-in generates this function's contract and the gui
+// only lists its pre-conditions so the assigns clause(s) for it remains unknown/missing
+// assigns clauses of functions which call this function must list what this function assigns
+// as well
+
 //------------------------------------------------------------------------------
 
 // These defintions are not visible to the user.  They are used only inside
@@ -1736,7 +1744,6 @@ static inline GrB_Index GB_rand ( )
 #define LOG GB_thread_local.details, GB_DLEN
 #define ERROR(f,s)                          \
 (                                           \
-        snprintf s ,                        \
         (GB_thread_local.file = __FILE__ ), \
         (GB_thread_local.line = __LINE__ ), \
         (GB_thread_local.info = f)          \
