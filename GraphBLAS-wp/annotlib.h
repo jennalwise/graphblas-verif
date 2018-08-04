@@ -483,9 +483,9 @@
  predicate matrix_valid{L}(GrB_Matrix m) =
     \valid(m) &&
     matrix_init(m) &&
-    0 < matrix_nrows(m) <= \pow(2,60) &&
-    0 < matrix_ncols(m) <= \pow(2,60) &&
-    0 <= matrix_nvals(m) <= \pow(2,60) &&
+    0 < matrix_nrows(m) <= ((GrB_Index)(1ULL << 60)) &&
+    0 < matrix_ncols(m) <= ((GrB_Index)(1ULL << 60)) &&
+    0 <= matrix_nvals(m) <= ((GrB_Index)(1ULL << 60)) &&
     type_valid(matrix_type(m)) &&
     matrix_storage_valid(m) &&
     matrix_fp_separated(m) ;
