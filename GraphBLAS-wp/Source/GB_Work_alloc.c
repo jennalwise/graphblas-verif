@@ -17,6 +17,7 @@
  behavior inputs_invalid :
     assumes plus_mult_overflow(Work_nitems_required,Work_itemsize) ;
  
+    frees \nothing ;
     allocates \nothing ;
     assigns \nothing ;
  
@@ -26,6 +27,13 @@
     assumes !plus_mult_overflow(Work_nitems_required,Work_itemsize) ;
     assumes (size_t)(Work_nitems_required * Work_itemsize) <= GB_thread_local.Work_size ;
  
+    requires (GB_thread_local.Work_size > 0 ==>
+                \freeable(GB_thread_local.Work)) ;
+    requires (GB_thread_local.Work_size > 0 ==>
+                \valid(((char*)GB_thread_local.Work) + (0..GB_thread_local.Work_size-1)) &&
+                \block_length(GB_thread_local.Work) == GB_thread_local.Work_size) ;
+ 
+    frees \nothing ;
     allocates \nothing ;
     assigns \nothing ;
  
@@ -37,6 +45,7 @@
  
     requires (GB_thread_local.Work == \null || \freeable(GB_thread_local.Work)) ;
  
+    frees GB_thread_local.Work ;
     allocates GB_thread_local.Work ;
     assigns __fc_heap_status ;
     assigns GB_thread_local.Work ;
