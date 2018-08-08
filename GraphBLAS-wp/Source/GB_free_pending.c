@@ -46,7 +46,12 @@
  
  behavior matrix_invalid :
     assumes !matrix_valid(A) ;
+    assumes !matrix_malloc_valid(A) ;
     ensures \true ;
+ 
+ behavior matrix_malloc_valid :
+    assumes matrix_malloc_valid(A) ;
+    ensures matrix_malloc_valid(A) ;
  
  behavior matrix_valid :
     assumes matrix_valid(A) ;

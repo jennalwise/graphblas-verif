@@ -1061,7 +1061,7 @@
         )
     ) ;
  
- // check p, i, x, pix pendings, and zombies
+ // check p, i, x, pix pendings, zombies, and matrix queue (sort of for the queue)
  predicate matrix_storage_valid{L}(GrB_Matrix m) =
     \valid(m->p + (0..(matrix_ncols(m)+1)-1))
     &&
@@ -1090,7 +1090,14 @@
     &&
     0 <= m->nzombies <= (m->p)[matrix_ncols(m)]
     &&
-    pending_tuples_valid(m) ;
+    pending_tuples_valid(m)
+    &&
+    (m->enqueued == \false ?
+        (m->queue_next == \null &&
+         m->queue_prev == \null
+        ) :
+        \true
+    ) ;
  
  predicate matrix_fp_separated{L}(GrB_Matrix m) =
     \separated(m,
@@ -1114,6 +1121,53 @@
     (m->ipending != \null ==> \freeable(m->ipending)) &&
     (m->jpending != \null ==> \freeable(m->jpending)) &&
     (m->xpending != \null ==> \freeable(m->xpending)) ;
+ 
+ // valid matrix except for column array being allocated but not initialized
+ // m->p_shallow will most likely be false if this is true, but not necessarily
+ predicate matrix_malloc_valid{L}(GrB_Matrix m) =
+    \valid(m)                                 &&
+    matrix_malloc_init(m)                     &&
+    0 < matrix_nrows(m) <= (1ULL << 60)       &&
+    0 < matrix_ncols(m) <= (1ULL << 60)       &&
+    0 <= matrix_nvals(m) <= (1ULL << 60)      &&
+    type_valid(matrix_type(m))                &&
+    \valid(m->p + (0..(matrix_ncols(m)+1)-1)) &&
+    matrix_nvals(m) == 0                      &&
+    m->i == \null                             &&
+    m->x == \null                             &&
+    m->i_shallow == \false                    &&
+    m->x_shallow == \false                    &&
+    m->nzombies == 0                          &&
+    pending_tuples_valid(m)                   &&
+    (m->enqueued == \false ?
+        (m->queue_next == \null &&
+         m->queue_prev == \null
+        ) :
+        \true
+    )                                         &&
+    matrix_fp_separated(m) ;
+ 
+ // doesn't include p, because p may be null, allocated but not initialized,
+ // or both allocated and initialized by the end of the call to GB_new
+ predicate matrix_storage_init{L}(GrB_Matrix m) =
+    \valid(m)                    &&
+    matrix_nvals(m) == 0         &&
+    m->i == \null                &&
+    m->x == \null                &&
+    m->p_shallow == \false       &&
+    m->i_shallow == \false       &&
+    m->x_shallow == \false       &&
+    m->npending == 0             &&
+    m->max_npending == 0         &&
+    m->sorted_pending == \true   &&
+    m->operator_pending == \null &&
+    m->ipending == \null         &&
+    m->jpending == \null         &&
+    m->xpending == \null         &&
+    m->queue_next == \null       &&
+    m->queue_prev == \null       &&
+    m->enqueued == \false        &&
+    m->nzombies == 0 ;
  */
 
 /*@
