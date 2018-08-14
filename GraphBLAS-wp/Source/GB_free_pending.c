@@ -18,6 +18,7 @@
  requires \valid(A) ;
  requires type_valid(matrix_type(A)) ;
  requires matrix_fp_separated(A) ;
+ requires A->max_npending >= 0 ;
  requires (A->ipending != \null ==> \freeable(A->ipending)) ;
  requires (A->jpending != \null ==> \freeable(A->jpending)) ;
  requires (A->xpending != \null ==> \freeable(A->xpending)) ;

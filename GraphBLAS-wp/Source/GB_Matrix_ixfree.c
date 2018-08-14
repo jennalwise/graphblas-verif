@@ -14,6 +14,9 @@
 #include "annotlib.h" // for common predicates & logic functions
 
 /*@
+ requires A != \null ==>
+                \valid(A) &&
+                type_valid(matrix_type(A)) ;
  frees A->i ;
  frees A->x ;
  frees A->ipending ;
@@ -53,8 +56,12 @@
     assumes !matrix_malloc_valid(A) ;
  
     requires \valid(A) ;
+    requires (matrix_init(A) ||
+             matrix_malloc_init(A)) ;
     requires A->npending >= 0 ;
     requires A->nzombies >= 0 ;
+    requires matrix_nvals(A) >= 0 ;
+    requires A->max_npending >= 0 ;
     requires type_valid(matrix_type(A)) ;
     requires matrix_fp_separated(A) ;
     requires (!(A->i_shallow) && A->i != \null ==> \freeable(A->i)) ;
@@ -63,11 +70,13 @@
     requires (A->jpending != \null ==> \freeable(A->jpending)) ;
     requires (A->xpending != \null ==> \freeable(A->xpending)) ;
  
+    ensures type_valid(matrix_type(A)) ;
+ 
     ensures A->i == \null ;
     ensures A->x == \null ;
     ensures A->i_shallow == \false ;
     ensures A->x_shallow == \false ;
-    ensures matrix_nvals(A) == 0 ;
+    ensures A->nzmax == 0 ;
     ensures A->nzombies == 0 ;
  
     ensures A->ipending == \null ;
@@ -100,7 +109,7 @@
     ensures A->x == \null ;
     ensures A->i_shallow == \false ;
     ensures A->x_shallow == \false ;
-    ensures matrix_nvals(A) == 0 ;
+    ensures A->nzmax == 0 ;
     ensures A->nzombies == 0 ;
  
     ensures A->ipending == \null ;
@@ -133,7 +142,7 @@
     ensures A->x == \null ;
     ensures A->i_shallow == \false ;
     ensures A->x_shallow == \false ;
-    ensures matrix_nvals(A) == 0 ;
+    ensures A->nzmax == 0 ;
     ensures A->nzombies == 0 ;
  
     ensures A->ipending == \null ;

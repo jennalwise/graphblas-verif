@@ -17,6 +17,43 @@
 #include "annotlib.h" // for common predicates & logic functions
 
 /*@
+ requires (matrix != \null ==> \valid(matrix)) ;
+ requires (\valid(matrix) && *matrix != \null ==> \valid(*matrix)) ;
+ requires (\valid(matrix) && \valid(*matrix) &&
+           (matrix_init(*matrix) || matrix_malloc_init(*matrix)) ==>
+                type_valid(matrix_type(*matrix)) &&
+                0 <= matrix_ncols(*matrix)+1 <= INT64_MAX) ;
+ 
+ frees *matrix ;
+ frees (*matrix)->p ;
+ frees (*matrix)->i ;
+ frees (*matrix)->x ;
+ frees (*matrix)->ipending ;
+ frees (*matrix)->jpending ;
+ frees (*matrix)->xpending ;
+ 
+ assigns __fc_heap_status ;
+ 
+ assigns *matrix ;
+ assigns (*matrix)->magic ;
+ assigns (*matrix)->p ;
+ assigns (*matrix)->i ;
+ assigns (*matrix)->i_shallow ;
+ assigns (*matrix)->x ;
+ assigns (*matrix)->x_shallow ;
+ assigns (*matrix)->nzmax ;
+ assigns (*matrix)->nzombies ;
+ assigns (*matrix)->ipending ;
+ assigns (*matrix)->jpending ;
+ assigns (*matrix)->xpending ;
+ assigns (*matrix)->npending ;
+ assigns (*matrix)->max_npending ;
+ assigns (*matrix)->sorted_pending ;
+ assigns (*matrix)->operator_pending ;
+ assigns (*matrix)->queue_prev ;
+ assigns (*matrix)->queue_next ;
+ assigns (*matrix)->enqueued ;
+ 
  behavior matrix_ptr_null :
     assumes matrix == \null ;
     frees \nothing ;
@@ -24,7 +61,6 @@
     ensures matrix == \null ;
  
  behavior matrix_null :
-    assumes matrix != \null ;
     assumes \valid(matrix) ;
     assumes *matrix == \null ;
     frees \nothing ;
@@ -32,9 +68,7 @@
     ensures *matrix == \null ;
  
  behavior matrix_not_init :
-    assumes matrix != \null ;
     assumes \valid(matrix) ;
-    assumes *matrix != \null ;
     assumes \valid(*matrix) ;
     assumes !matrix_init(*matrix) ;
     assumes !matrix_malloc_init(*matrix) ;
@@ -43,48 +77,24 @@
     ensures *matrix == \null ;
  
  behavior matrix_valid :
-    assumes matrix != \null ;
     assumes \valid(matrix) ;
-    assumes *matrix != \null ;
     assumes \valid(*matrix) ;
     assumes (matrix_init(*matrix) ||
              matrix_malloc_init(*matrix)) ;
  
+    requires (*matrix)->npending >= 0 ;
+    requires (*matrix)->nzombies >= 0 ;
+    requires 0 <= matrix_ncols(*matrix)+1 <= INT64_MAX ;
+    requires matrix_nvals(*matrix) >= 0;
+    requires (*matrix)->max_npending >= 0 ;
+    requires type_valid(matrix_type(*matrix)) ;
+    requires matrix_fp_separated(*matrix) ;
     requires \freeable(*matrix) ;
     requires freeable_storage(*matrix) ;
  
-    frees *matrix ;
-    frees (*matrix)->p ;
-    frees (*matrix)->i ;
-    frees (*matrix)->x ;
-    frees (*matrix)->ipending ;
-    frees (*matrix)->jpending ;
-    frees (*matrix)->xpending ;
- 
-    assigns __fc_heap_status ;
- 
-    assigns *matrix ;
-    assigns (*matrix)->magic ;
-    assigns (*matrix)->p ;
-    assigns (*matrix)->i ;
-    assigns (*matrix)->i_shallow ;
-    assigns (*matrix)->x ;
-    assigns (*matrix)->x_shallow ;
-    assigns (*matrix)->nzmax ;
-    assigns (*matrix)->nzombies ;
-    assigns (*matrix)->ipending ;
-    assigns (*matrix)->jpending ;
-    assigns (*matrix)->xpending ;
-    assigns (*matrix)->npending ;
-    assigns (*matrix)->max_npending ;
-    assigns (*matrix)->sorted_pending ;
-    assigns (*matrix)->operator_pending ;
-    assigns (*matrix)->queue_prev ;
-    assigns (*matrix)->queue_next ;
-    assigns (*matrix)->enqueued ;
- 
     ensures *matrix == \null ;
- complete behaviors ;
+    ensures type_valid(matrix_type(\old(*matrix))) ;
+ 
  disjoint behaviors ;
  */
 void GB_Matrix_free             // free a matrix

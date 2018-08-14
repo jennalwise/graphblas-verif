@@ -1129,7 +1129,6 @@
     matrix_malloc_init(m)                     &&
     0 < matrix_nrows(m) <= (1ULL << 60)       &&
     0 < matrix_ncols(m) <= (1ULL << 60)       &&
-    0 <= matrix_nvals(m) <= (1ULL << 60)      &&
     type_valid(matrix_type(m))                &&
     \valid(m->p + (0..(matrix_ncols(m)+1)-1)) &&
     matrix_nvals(m) == 0                      &&
