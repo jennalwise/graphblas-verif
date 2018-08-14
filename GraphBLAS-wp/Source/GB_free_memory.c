@@ -25,16 +25,14 @@
 #include "annotlib.h" // for common predicates & logic functions
 
 /*@
+ frees p ;
+ assigns __fc_heap_status ;
  behavior p_null :
     assumes p == \null ;
-    frees \nothing ;
-    assigns \nothing ;
     ensures p == \null ;
  behavior p_not_null :
     assumes p != \null ;
     requires \freeable(p) ;
-    frees p ;
-    assigns __fc_heap_status ;
     ensures \allocable(p) ;
  complete behaviors ;
  disjoint behaviors ;

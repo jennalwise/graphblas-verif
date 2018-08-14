@@ -56,15 +56,11 @@
  
  behavior matrix_ptr_null :
     assumes matrix == \null ;
-    frees \nothing ;
-    assigns \nothing ;
     ensures matrix == \null ;
  
  behavior matrix_null :
     assumes \valid(matrix) ;
     assumes *matrix == \null ;
-    frees \nothing ;
-    assigns *matrix ;
     ensures *matrix == \null ;
  
  behavior matrix_not_init :
@@ -72,8 +68,6 @@
     assumes \valid(*matrix) ;
     assumes !matrix_init(*matrix) ;
     assumes !matrix_malloc_init(*matrix) ;
-    frees \nothing ;
-    assigns *matrix ;
     ensures *matrix == \null ;
  
  behavior matrix_valid :

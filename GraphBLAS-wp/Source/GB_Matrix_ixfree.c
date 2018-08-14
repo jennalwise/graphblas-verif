@@ -46,8 +46,6 @@
  
  behavior matrix_null :
     assumes A == \null ;
-    frees \nothing ;
-    assigns \nothing ;
     ensures A == \null ;
  
  behavior matrix_invalid :
