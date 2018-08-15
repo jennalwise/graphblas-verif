@@ -23,16 +23,42 @@
  requires \separated(GB_thread_local.file,\union(A,type)) ;
  requires \separated(A,type) ;
  
+ allocates *A ;
+ allocates \at((*A),Post)->p ;
+ 
+ assigns __fc_heap_status ;
+ 
+ assigns GB_thread_local.where ;
+ assigns GB_thread_local.file ;
+ assigns GB_thread_local.line ;
+ assigns GB_thread_local.info ;
+ 
+ assigns *A ;
+ assigns \at((*A),Post)->magic ;
+ assigns \at((*A),Post)->type ;
+ assigns \at((*A),Post)->nrows ;
+ assigns \at((*A),Post)->ncols ;
+ assigns \at((*A),Post)->nzmax ;
+ assigns \at((*A),Post)->p ;
+ assigns \at((*A),Post)->i ;
+ assigns \at((*A),Post)->x ;
+ assigns \at((*A),Post)->p_shallow ;
+ assigns \at((*A),Post)->i_shallow ;
+ assigns \at((*A),Post)->x_shallow ;
+ assigns \at((*A),Post)->npending ;
+ assigns \at((*A),Post)->max_npending ;
+ assigns \at((*A),Post)->sorted_pending ;
+ assigns \at((*A),Post)->operator_pending ;
+ assigns \at((*A),Post)->ipending ;
+ assigns \at((*A),Post)->jpending ;
+ assigns \at((*A),Post)->xpending ;
+ assigns \at((*A),Post)->queue_next ;
+ assigns \at((*A),Post)->queue_prev ;
+ assigns \at((*A),Post)->enqueued ;
+ assigns \at((*A),Post)->nzombies ;
+ 
  behavior matrix_handle_null :
     assumes A == \null ;
- 
-    allocates \nothing ;
- 
-    assigns GB_thread_local.where ;
-    assigns GB_thread_local.file ;
-    assigns GB_thread_local.line ;
-    assigns GB_thread_local.info ;
- 
     ensures (\result == GrB_NULL_POINTER ||
              \result == GrB_PANIC) ;
     ensures (\result == GrB_NULL_POINTER ==>
@@ -44,15 +70,6 @@
              ncols > ((GrB_Index)(1ULL << 60)) ||
              !type_valid(type)) ;
     requires \valid(A) ;
- 
-    allocates \nothing ;
- 
-    assigns GB_thread_local.where ;
-    assigns GB_thread_local.file ;
-    assigns GB_thread_local.line ;
-    assigns GB_thread_local.info ;
-    assigns *A ;
- 
     ensures (\result == GrB_NULL_POINTER         ||
              \result == GrB_UNINITIALIZED_OBJECT ||
              \result == GrB_INVALID_OBJECT       ||
@@ -82,41 +99,6 @@
     assumes nrows <= ((GrB_Index)(1ULL << 60)) ;
     assumes ncols <= ((GrB_Index)(1ULL << 60)) ;
     requires \valid(A) ;
- 
-    allocates *A ;
-    allocates \at((*A),Post)->p ;
- 
-    assigns __fc_heap_status ;
- 
-    assigns GB_thread_local.where ;
-    assigns GB_thread_local.file ;
-    assigns GB_thread_local.line ;
-    assigns GB_thread_local.info ;
- 
-    assigns *A ;
-    assigns \at((*A),Post)->magic ;
-    assigns \at((*A),Post)->type ;
-    assigns \at((*A),Post)->nrows ;
-    assigns \at((*A),Post)->ncols ;
-    assigns \at((*A),Post)->nzmax ;
-    assigns \at((*A),Post)->p ;
-    assigns \at((*A),Post)->i ;
-    assigns \at((*A),Post)->x ;
-    assigns \at((*A),Post)->p_shallow ;
-    assigns \at((*A),Post)->i_shallow ;
-    assigns \at((*A),Post)->x_shallow ;
-    assigns \at((*A),Post)->npending ;
-    assigns \at((*A),Post)->max_npending ;
-    assigns \at((*A),Post)->sorted_pending ;
-    assigns \at((*A),Post)->operator_pending ;
-    assigns \at((*A),Post)->ipending ;
-    assigns \at((*A),Post)->jpending ;
-    assigns \at((*A),Post)->xpending ;
-    assigns \at((*A),Post)->queue_next ;
-    assigns \at((*A),Post)->queue_prev ;
-    assigns \at((*A),Post)->enqueued ;
-    assigns \at((*A),Post)->nzombies ;
- 
     ensures (\result == GrB_SUCCESS ||
              \result == GrB_OUT_OF_MEMORY) ;
     ensures (\result == GrB_OUT_OF_MEMORY ==> *A == \null) ;

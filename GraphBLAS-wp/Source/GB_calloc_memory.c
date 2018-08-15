@@ -34,22 +34,23 @@
 #include "annotlib.h" // for common predicates & logic functions
 
 /*@
+ allocates \result ;
+ assigns __fc_heap_status ;
+ assigns \result ;
+ 
  behavior inputs_invalid :
     assumes plus_mult_overflow(nitems,size_of_item) ||
             nitems > ((GrB_Index)(1ULL << 60))      ||
             size_of_item > ((GrB_Index)(1ULL << 60)) ;
-    allocates \nothing ;
-    assigns \result ;
     ensures \result == \null ;
+ 
  behavior inputs_valid :
     assumes !plus_mult_overflow(nitems,size_of_item) ;
     assumes nitems <= ((GrB_Index)(1ULL << 60)) ;
     assumes size_of_item <= ((GrB_Index)(1ULL << 60)) ;
-    allocates \result ;
-    assigns __fc_heap_status ;
-    assigns \result ;
     ensures (\result == \null || \result != \null) ;
     ensures (\result != \null ==> \fresh(\result,nitems * size_of_item)) ;
+ 
  complete behaviors ;
  disjoint behaviors ;
  */

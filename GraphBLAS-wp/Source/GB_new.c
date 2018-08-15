@@ -234,6 +234,7 @@
  requires \separated(matrix_handle,type) ;
  
  allocates *matrix_handle ;
+ allocates \at((*matrix_handle),Post)->p ;
  
  assigns __fc_heap_status ;
  
@@ -285,8 +286,6 @@
  
  behavior calloc:
     assumes Ap_calloc == \true ;
-    allocates *matrix_handle ;
-    allocates \at((*matrix_handle),Post)->p ;
     ensures \result == GrB_SUCCESS ==>
                 matrix_valid(*matrix_handle) &&
                 freeable_storage(*matrix_handle) ;
@@ -294,8 +293,6 @@
  behavior malloc:
     assumes Ap_calloc == \false ;
     assumes Ap_malloc == \true ;
-    allocates *matrix_handle ;
-    allocates \at((*matrix_handle),Post)->p ;
     ensures \result == GrB_SUCCESS ==>
                 matrix_malloc_init(*matrix_handle) &&
                 !matrix_init(*matrix_handle)       &&
