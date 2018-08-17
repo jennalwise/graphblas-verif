@@ -274,29 +274,37 @@
             matrix_nrows(*matrix_handle) == (int64_t)nrows &&
             matrix_ncols(*matrix_handle) == (int64_t)ncols &&
             matrix_nvals(*matrix_handle) == 0              &&
+            matrix_storage_init(*matrix_handle)            &&
+            \at(*matrix_handle,Pre) != *matrix_handle      &&
             \freeable(*matrix_handle)) ;
  
  behavior no_calloc_or_malloc:
     assumes Ap_calloc == \false ;
     assumes Ap_malloc == \false ;
     ensures \result == GrB_SUCCESS ==>
-                matrix_malloc_init(*matrix_handle) &&
-                !matrix_init(*matrix_handle)       &&
+                (*matrix_handle)->p == \null           &&
+                matrix_malloc_init(*matrix_handle)     &&
+                !matrix_malloc_valid(*matrix_handle)   &&
+                !matrix_init(*matrix_handle)           &&
                 !matrix_valid(*matrix_handle) ;
  
  behavior calloc:
     assumes Ap_calloc == \true ;
     ensures \result == GrB_SUCCESS ==>
-                matrix_valid(*matrix_handle) &&
+                !matrix_malloc_init(*matrix_handle)  &&
+                !matrix_malloc_valid(*matrix_handle) &&
+                matrix_init(*matrix_handle)          &&
+                matrix_valid(*matrix_handle)         &&
                 freeable_storage(*matrix_handle) ;
  
  behavior malloc:
     assumes Ap_calloc == \false ;
     assumes Ap_malloc == \true ;
     ensures \result == GrB_SUCCESS ==>
-                matrix_malloc_init(*matrix_handle) &&
-                !matrix_init(*matrix_handle)       &&
-                !matrix_valid(*matrix_handle)      &&
+                matrix_malloc_init(*matrix_handle)  &&
+                matrix_malloc_valid(*matrix_handle) &&
+                !matrix_init(*matrix_handle)        &&
+                !matrix_valid(*matrix_handle)       &&
                 freeable_storage(*matrix_handle) ;
  
  complete behaviors ;
@@ -334,7 +342,7 @@ GrB_Info GB_new                 // create a new matrix
         // out of memory
         return (ERROR (GrB_OUT_OF_MEMORY, (LOG, "out of memory"))) ;
     }
-
+    
     // initialize the matrix
     GrB_Matrix A = *matrix_handle ;
     A->type = type ;

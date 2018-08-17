@@ -49,7 +49,12 @@
     assumes nitems <= ((GrB_Index)(1ULL << 60)) ;
     assumes size_of_item <= ((GrB_Index)(1ULL << 60)) ;
     ensures (\result == \null || \result != \null) ;
-    ensures (\result != \null ==> \fresh(\result,nitems * size_of_item)) ;
+    ensures (\result != \null ==>
+                \fresh(\result,nitems * size_of_item)                     &&
+                \valid(((char*)\result) + (0..nitems*size_of_item-1))     && // fresh not supported by WP, so need this redundant stmt for rte
+                \initialized(((char*)\result)+(0..nitems*size_of_item-1)) &&
+                \subset(((char*)\result)[0..nitems*size_of_item-1], {0})
+            ) ;
  
  complete behaviors ;
  disjoint behaviors ;

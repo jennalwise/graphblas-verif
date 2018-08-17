@@ -18,6 +18,9 @@
 #include "annotlib.h" // for common predicates & logic functions
 
 /*@
+ requires A != \null ==> \valid(A) ;
+ requires type != \null ==> type_valid(type) ;
+ 
  requires \separated(&GB_thread_local,\union(A,type)) ;
  requires \separated(GB_thread_local.where,\union(A,type)) ;
  requires \separated(GB_thread_local.file,\union(A,type)) ;
@@ -107,7 +110,12 @@
                 matrix_nrows(*A) == (int64_t)nrows &&
                 matrix_ncols(*A) == (int64_t)ncols &&
                 matrix_nvals(*A) == 0              &&
+                matrix_storage_init(*A)            &&
+                !matrix_malloc_init(*A)            &&
+                !matrix_malloc_valid(*A)           &&
+                matrix_init(*A)                    &&
                 matrix_valid(*A)                   &&
+                \at(*A,Pre) != *A                  &&
                 \freeable(*A)                      &&
                 freeable_storage(*A)) ;
  
