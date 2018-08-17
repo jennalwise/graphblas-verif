@@ -38,52 +38,47 @@
  predicate type_init{L}(GrB_Type t) = magic_valid(t->magic) ;
  
  predicate type_code_valid{L}(GrB_Type t) =
-    \let c = type_code(t);
-        c == GB_BOOL_code   ||
-        c == GB_INT8_code   ||
-        c == GB_UINT8_code  ||
-        c == GB_INT16_code  ||
-        c == GB_UINT16_code ||
-        c == GB_INT32_code  ||
-        c == GB_UINT32_code ||
-        c == GB_INT64_code  ||
-        c == GB_UINT64_code ||
-        c == GB_FP32_code   ||
-        c == GB_FP64_code   ||
-        c == GB_UDT_code ;
+    type_code(t) == GB_BOOL_code   ||
+    type_code(t) == GB_INT8_code   ||
+    type_code(t) == GB_UINT8_code  ||
+    type_code(t) == GB_INT16_code  ||
+    type_code(t) == GB_UINT16_code ||
+    type_code(t) == GB_INT32_code  ||
+    type_code(t) == GB_UINT32_code ||
+    type_code(t) == GB_INT64_code  ||
+    type_code(t) == GB_UINT64_code ||
+    type_code(t) == GB_FP32_code   ||
+    type_code(t) == GB_FP64_code   ||
+    type_code(t) == GB_UDT_code ;
  
  predicate type_size_valid{L}(GrB_Type t) =
     type_size(t) != 0 &&
-    (\let c = type_code(t);
-        (\let s = type_size(t);
-            (c == GB_BOOL_code ?
-                s == sizeof(bool) :
-            (c == GB_INT8_code ?
-                s == sizeof(int8_t) :
-            (c == GB_UINT8_code ?
-                s == sizeof(uint8_t) :
-            (c == GB_INT16_code ?
-                s == sizeof(int16_t) :
-            (c == GB_UINT16_code ?
-                s == sizeof(uint16_t) :
-            (c == GB_INT32_code ?
-                s == sizeof(int32_t) :
-            (c == GB_UINT32_code ?
-                s == sizeof(uint32_t) :
-            (c == GB_INT64_code ?
-                s == sizeof(int64_t) :
-            (c == GB_UINT64_code ?
-                s == sizeof(uint64_t) :
-            (c == GB_FP32_code ?
-                s == sizeof(float) :
-            (c == GB_FP64_code ?
-                s == sizeof(double) :
-            (c == GB_UDT_code ?
-                s == s :
-                \false
-            ))))))))))))
-        )
-    ) ;
+    (type_code(t) == GB_BOOL_code ?
+        type_size(t) == sizeof(bool) :
+    (type_code(t) == GB_INT8_code ?
+        type_size(t) == sizeof(int8_t) :
+    (type_code(t) == GB_UINT8_code ?
+        type_size(t) == sizeof(uint8_t) :
+    (type_code(t) == GB_INT16_code ?
+        type_size(t) == sizeof(int16_t) :
+    (type_code(t) == GB_UINT16_code ?
+        type_size(t) == sizeof(uint16_t) :
+    (type_code(t) == GB_INT32_code ?
+        type_size(t) == sizeof(int32_t) :
+    (type_code(t) == GB_UINT32_code ?
+        type_size(t) == sizeof(uint32_t) :
+    (type_code(t) == GB_INT64_code ?
+        type_size(t) == sizeof(int64_t) :
+    (type_code(t) == GB_UINT64_code ?
+        type_size(t) == sizeof(uint64_t) :
+    (type_code(t) == GB_FP32_code ?
+        type_size(t) == sizeof(float) :
+    (type_code(t) == GB_FP64_code ?
+        type_size(t) == sizeof(double) :
+    (type_code(t) == GB_UDT_code ?
+        type_size(t) == type_size(t) :
+        \false
+    )))))))))))) ;
  */
 
 /*@
@@ -242,15 +237,11 @@
  // internal predicate of monoid_valid
  predicate identity_is_zero_bool_valid{L}(GrB_Monoid m) =
     (m->identity_is_zero == \true ?
-        (\let i = (int8_t*)monoid_identity(m);
-            (\forall int64_t k; 0 <= k < type_size(binaryop_outtype(monoid_op(m)))
-                ==> i[k] == 0
-            )
+        (\forall int64_t k; 0 <= k < type_size(binaryop_outtype(monoid_op(m)))
+            ==> ((int8_t*)monoid_identity(m))[k] == 0
         ) :
-        !(\let i = (int8_t*)monoid_identity(m);
-            (\forall int64_t k; 0 <= k < type_size(binaryop_outtype(monoid_op(m)))
-                ==> i[k] == 0
-            )
+        !(\forall int64_t k; 0 <= k < type_size(binaryop_outtype(monoid_op(m)))
+            ==> ((int8_t*)monoid_identity(m))[k] == 0
          )
     ) ;
  
@@ -389,38 +380,32 @@
          &&
          tuple_indices_in_bounds :
             (\forall int64_t k; 0 <= k < m->npending ==>
-                (\let i = (m->ipending)[k];
-                    (\let j = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k]));
-                         0 <= i < matrix_nrows(m) &&
-                         0 <= j < matrix_ncols(m)
-                    )
-                )
+                (0 <= (m->ipending)[k] < matrix_nrows(m)) &&
+                (0 <= (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k])) < matrix_ncols(m))
             )
          &&
          tuple_indices_sorted :
             (m->sorted_pending == \true ?
                 (\forall int64_t k; 0 <= k < m->npending-1 ==>
-                     (\let ilast = (m->ipending)[k];
-                         (\let jlast = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k]));
-                             (\let i = (m->ipending)[k+1];
-                                 (\let j = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k+1]));
-                                    jlast < j || (jlast == j && ilast <= i)
-                                 )
-                             )
-                         )
-                     )
+                    ((matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k])) <
+                        (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k+1]))
+                    ) ||
+                    ((matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k])) ==
+                        (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k+1]))
+                      &&
+                     ((m->ipending)[k] <= (m->ipending)[k+1])
+                    )
                 ) :
                 !(\forall int64_t k; 0 <= k < m->npending-1 ==>
-                    (\let ilast = (m->ipending)[k];
-                        (\let jlast = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k]));
-                            (\let i = (m->ipending)[k+1];
-                                (\let j = (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k+1]));
-                                    jlast < j || (jlast == j && ilast <= i)
-                                )
-                            )
-                        )
+                    ((matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k])) <
+                        (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k+1]))
+                    ) ||
+                    ((matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k])) ==
+                        (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k+1]))
+                      &&
+                     ((m->ipending)[k] <= (m->ipending)[k+1])
                     )
-                 )
+                )
             )
          &&
          operator_pending_valid :
@@ -481,9 +466,9 @@
  predicate matrix_valid{L}(GrB_Matrix m) =
     \valid(m) &&
     matrix_init(m) &&
-    0 < matrix_nrows(m) <= \pow(2,60) &&
-    0 < matrix_ncols(m) <= \pow(2,60) &&
-    0 <= matrix_nvals(m) <= \pow(2,60) &&
+    0 < matrix_nrows(m) <= ((GrB_Index)(1ULL << 60)) &&
+    0 < matrix_ncols(m) <= ((GrB_Index)(1ULL << 60)) &&
+    0 <= matrix_nvals(m) <= ((GrB_Index)(1ULL << 60)) &&
     type_valid(matrix_type(m)) &&
     matrix_storage_valid(m) &&
     matrix_fp_separated(m) ;
