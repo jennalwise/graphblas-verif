@@ -17,19 +17,31 @@
  requires \separated(&GB_thread_local,\union(nrows,A)) ;
  requires nrows != \null ;
  requires A != \null ;
- requires matrix_valid(A) ;
+ requires \valid(A) ;
  requires \valid(nrows) ;
+ requires 0 < matrix_nrows(A) <= 1ULL << 60 ;
+ 
  assigns *nrows ;
  assigns GB_thread_local.info ;
- behavior inputs_no_alias:
+ 
+ ensures \result == GrB_SUCCESS ;
+ 
+ behavior inputs_no_alias :
     assumes \separated(nrows,A) ;
-    ensures \result == GrB_SUCCESS ==>
-                matrix_valid(A)           &&
-                *nrows == matrix_nrows(A) &&
-                \valid(nrows) ;
- behavior inputs_alias:
+    ensures (\result == GrB_SUCCESS && matrix_valid{Pre}(A) ==>
+                matrix_valid(A) &&
+                *nrows == matrix_nrows(A)) ;
+    ensures (\result == GrB_SUCCESS && !matrix_valid{Pre}(A) ==>
+                !matrix_valid(A) &&
+                *nrows == matrix_nrows(A)) ;
+ 
+ behavior inputs_alias :
     assumes !\separated(nrows,A) ;
-    ensures \result == GrB_SUCCESS ==> \valid(nrows) ;
+    ensures \result == GrB_SUCCESS ==>
+                *nrows == matrix_nrows{Pre}(A) ;
+ 
+ complete behaviors ;
+ disjoint behaviors ;
  */
 GrB_Info GB_Matrix_nrows    // get the number of rows of a matrix
 (

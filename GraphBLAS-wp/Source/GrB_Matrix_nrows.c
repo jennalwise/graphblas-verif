@@ -14,17 +14,30 @@
 #include "annotlib.h" // for common predicates & logic functions
 
 /*@
+ requires nrows != \null ==> \valid(nrows) ;
+ requires A != \null ==> \valid(A) ;
+ requires \valid(A) && matrix_init(A) ==> 0 < matrix_nrows(A) <= 1ULL << 60 ;
+ 
  requires \separated(&GB_thread_local,\union(nrows,A)) ;
  requires \separated(GB_thread_local.where,\union(nrows,A)) ;
  requires \separated(GB_thread_local.file,\union(nrows,A)) ;
+ 
+ assigns *nrows ;
+ assigns GB_thread_local.where ;
+ assigns GB_thread_local.file ;
+ assigns GB_thread_local.line ;
+ assigns GB_thread_local.info ;
+ 
+ ensures \result == GrB_SUCCESS              ||
+         \result == GrB_NULL_POINTER         ||
+         \result == GrB_INVALID_OBJECT       ||
+         \result == GrB_UNINITIALIZED_OBJECT ||
+         \result == GrB_PANIC ;
+ 
  behavior input_invalid:
     assumes nrows == \null  ||
             A == \null      ||
             !matrix_valid(A) ;
-    assigns GB_thread_local.where ;
-    assigns GB_thread_local.file ;
-    assigns GB_thread_local.line ;
-    assigns GB_thread_local.info ;
     ensures (\result == GrB_NULL_POINTER ==>
                 nrows == \null || A == \null)        ||
             (\result == GrB_INVALID_OBJECT ==>
@@ -32,33 +45,27 @@
             (\result == GrB_UNINITIALIZED_OBJECT ==>
                 nrows != \null &&
                 \valid(A)      &&
-                !matrix_init(A))                     ||
-            \result == GrB_PANIC ;
+                !matrix_init(A)) ;
+ 
  behavior input_valid_no_alias:
     assumes nrows != \null ;
     assumes A != \null ;
     assumes matrix_valid(A) ;
     assumes \separated(nrows,A) ;
     requires \valid(nrows) ;
-    assigns *nrows ;
-    assigns GB_thread_local.where ;
-    assigns GB_thread_local.info ;
-    ensures (\result == GrB_SUCCESS ==>
-                matrix_valid(A)           &&
-                *nrows == matrix_nrows(A) &&
-                \valid(nrows))            ||
-            \result == GrB_PANIC ;
+    ensures \result == GrB_SUCCESS ==>
+                matrix_valid(A) &&
+                *nrows == matrix_nrows(A) ;
+ 
  behavior input_valid_alias:
     assumes nrows != \null ;
     assumes A != \null ;
     assumes matrix_valid(A) ;
     assumes !\separated(nrows,A) ;
     requires \valid(nrows) ;
-    assigns *nrows ;
-    assigns GB_thread_local.where ;
-    assigns GB_thread_local.info ;
-    ensures (\result == GrB_SUCCESS ==> \valid(nrows)) ||
-            \result == GrB_PANIC ;
+    ensures \result == GrB_SUCCESS ==>
+                *nrows == matrix_nrows{Pre}(A) ;
+ 
  complete behaviors ;
  disjoint behaviors ;
  */
