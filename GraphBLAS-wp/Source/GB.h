@@ -13,6 +13,7 @@
 // Changed NAN to nan("") in FMIN and FMAX since NAN is not supported by Frama-C's math.h file
 // Added isnan macro definition to end of this file following the IEEE 754 Standard -- Frama-C doesn't have
 // isnan in math.h
+
 // *** JENNA CHANGE 6/25/18 ***
 // Rewrote IS_INTEGER, IS_FLOAT, PLUS_INF, MINUS_INF to remove the use of _Generic
 // Removed dependence on FP built-ins used in CAST macro definition
@@ -26,6 +27,14 @@
 // All contained completely within GB.h except for IMINV and IDIV
 // IDIV also in GB_ops_template.c only -- all fixed
 // IMINV also in GB_ops_template.c and GB_transpose_op.c only -- all fixed
+
+// *** JENNA CHANGE 7/25/18 ***
+// removed following line from ERROR due to use of variadic function
+// snprintf s ,                        \
+// the variadic plug-in generates this function's contract and the gui
+// only lists its pre-conditions so the assigns clause(s) for it remains unknown/missing
+// assigns clauses of functions which call this function must list what this function assigns
+// as well
 
 //------------------------------------------------------------------------------
 
@@ -1736,7 +1745,6 @@ static inline GrB_Index GB_rand ( )
 #define LOG GB_thread_local.details, GB_DLEN
 #define ERROR(f,s)                          \
 (                                           \
-        snprintf s ,                        \
         (GB_thread_local.file = __FILE__ ), \
         (GB_thread_local.line = __LINE__ ), \
         (GB_thread_local.info = f)          \

@@ -1,12 +1,12 @@
 //------------------------------------------------------------------------------
-// GrB_Matrix_nrows: number of rows of a sparse matrix
+// GrB_Matrix_ncols: number of columns of a sparse matrix
 //------------------------------------------------------------------------------
 
 // SuiteSparse:GraphBLAS, Timothy A. Davis, (c) 2017-2018, All Rights Reserved.
 // http://suitesparse.com   See GraphBLAS/Doc/License.txt for license.
 
 // *** JENNA ANNOTATION 7/25/18 ***
-// GrB_Matrix_nrows
+// GrB_Matrix_ncols
 
 //------------------------------------------------------------------------------
 
@@ -14,15 +14,14 @@
 #include "annotlib.h" // for common predicates & logic functions
 
 /*@
- requires nrows != \null ==> \valid(nrows) ;
+ requires ncols != \null ==> \valid(ncols) ;
  requires A != \null ==> \valid(A) ;
- requires \valid(A) && matrix_init(A) ==> 0 < matrix_nrows(A) <= 1ULL << 60 ;
  
- requires \separated(&GB_thread_local,\union(nrows,A)) ;
- requires \separated(GB_thread_local.where,\union(nrows,A)) ;
- requires \separated(GB_thread_local.file,\union(nrows,A)) ;
+ requires \separated(&GB_thread_local,\union(ncols,A)) ;
+ requires \separated(GB_thread_local.where,\union(ncols,A)) ;
+ requires \separated(GB_thread_local.file,\union(ncols,A)) ;
  
- assigns *nrows ;
+ assigns *ncols ;
  assigns GB_thread_local.where ;
  assigns GB_thread_local.file ;
  assigns GB_thread_local.line ;
@@ -35,43 +34,43 @@
          \result == GrB_PANIC ;
  
  behavior input_invalid:
-    assumes nrows == \null  ||
+    assumes ncols == \null  ||
             A == \null      ||
             !matrix_valid(A) ;
     ensures (\result == GrB_NULL_POINTER ==>
-                nrows == \null || A == \null)        ||
+                ncols == \null || A == \null)        ||
             (\result == GrB_INVALID_OBJECT ==>
                 !matrix_valid(A))                    ||
             (\result == GrB_UNINITIALIZED_OBJECT ==>
-                nrows != \null &&
+                ncols != \null &&
                 \valid(A)      &&
                 !matrix_init(A)) ;
  
  behavior input_valid_no_alias:
-    assumes nrows != \null ;
+    assumes ncols != \null ;
     assumes A != \null ;
     assumes matrix_valid(A) ;
-    assumes \separated(nrows,A) ;
-    requires \valid(nrows) ;
+    assumes \separated(ncols,A) ;
+    requires \valid(ncols) ;
     ensures \result == GrB_SUCCESS ==>
                 matrix_valid(A) &&
-                *nrows == matrix_nrows(A) ;
+                *ncols == matrix_ncols(A) ;
  
  behavior input_valid_alias:
-    assumes nrows != \null ;
+    assumes ncols != \null ;
     assumes A != \null ;
     assumes matrix_valid(A) ;
-    assumes !\separated(nrows,A) ;
-    requires \valid(nrows) ;
+    assumes !\separated(ncols,A) ;
+    requires \valid(ncols) ;
     ensures \result == GrB_SUCCESS ==>
-                *nrows == matrix_nrows{Pre}(A) ;
+                *ncols == matrix_ncols{Pre}(A) ;
  
  complete behaviors ;
  disjoint behaviors ;
  */
-GrB_Info GrB_Matrix_nrows   // get the number of rows of a matrix
+GrB_Info GrB_Matrix_ncols   // get the number of columns of a matrix
 (
-    GrB_Index *nrows,       // matrix has nrows rows
+    GrB_Index *ncols,       // matrix has ncols columns
     const GrB_Matrix A      // matrix to query
 )
 {
@@ -80,14 +79,18 @@ GrB_Info GrB_Matrix_nrows   // get the number of rows of a matrix
     // check inputs
     //--------------------------------------------------------------------------
 
-    WHERE ("GrB_Matrix_nrows (&nrows, A)") ;
-    RETURN_IF_NULL (nrows) ;
+    WHERE ("GrB_Matrix_ncols (&ncols, A)") ;
+    RETURN_IF_NULL (ncols) ;
     RETURN_IF_NULL_OR_UNINITIALIZED (A) ;
 
+    // zombies and pending tuples have no effect on nrows
+    // but don't bother asserting that fact here
+
     //--------------------------------------------------------------------------
-    // get the number of rows
+    // return the number of columns
     //--------------------------------------------------------------------------
 
-    return (GB_Matrix_nrows (nrows, A)) ;
+    (*ncols) = A->ncols ;
+    return (REPORT_SUCCESS) ;
 }
 
