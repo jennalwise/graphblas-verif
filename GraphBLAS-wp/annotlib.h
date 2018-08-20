@@ -36,8 +36,11 @@
  logic size_t type_size{L}(GrB_Type t) = t->size ;
  
  predicate type_init{L}(GrB_Type t) = magic_valid(t->magic) ;
- 
- predicate type_code_valid{L}(GrB_Type t) =
+ */
+
+ /*
+  // Slow for discharging proofs with Alt-ergo particularly when negated
+  predicate type_code_valid{L}(GrB_Type t) =
     type_code(t) == GB_BOOL_code   ||
     type_code(t) == GB_INT8_code   ||
     type_code(t) == GB_UINT8_code  ||
@@ -50,8 +53,10 @@
     type_code(t) == GB_FP32_code   ||
     type_code(t) == GB_FP64_code   ||
     type_code(t) == GB_UDT_code ;
- 
- predicate type_size_valid{L}(GrB_Type t) =
+  
+  // Alt-ergo has problems discharging proofs fast using this predicate defined
+  // this way - particularly when negation occurs
+  predicate type_size_valid{L}(GrB_Type t) =
     type_size(t) != 0 &&
     (type_code(t) == GB_BOOL_code ?
         type_size(t) == sizeof(bool) :
@@ -79,6 +84,27 @@
         type_size(t) == type_size(t) :
         \false
     )))))))))))) ;
+ */
+ 
+ /*@
+  predicate type_code_valid{L}(GrB_Type t) =
+    GB_BOOL_code <= type_code(t) <= GB_UDT_code ;
+  
+  predicate type_size_valid{L}(GrB_Type t) =
+    type_size(t) != 0  &&
+    type_code_valid(t) &&
+    (type_code(t) == GB_BOOL_code   ==> type_size(t) == sizeof(bool))     &&
+    (type_code(t) == GB_INT8_code   ==> type_size(t) == sizeof(int8_t))   &&
+    (type_code(t) == GB_UINT8_code  ==> type_size(t) == sizeof(uint8_t))  &&
+    (type_code(t) == GB_INT16_code  ==> type_size(t) == sizeof(int16_t))  &&
+    (type_code(t) == GB_UINT16_code ==> type_size(t) == sizeof(uint16_t)) &&
+    (type_code(t) == GB_INT32_code  ==> type_size(t) == sizeof(int32_t))  &&
+    (type_code(t) == GB_UINT32_code ==> type_size(t) == sizeof(uint32_t)) &&
+    (type_code(t) == GB_INT64_code  ==> type_size(t) == sizeof(int64_t))  &&
+    (type_code(t) == GB_UINT64_code ==> type_size(t) == sizeof(uint64_t)) &&
+    (type_code(t) == GB_FP32_code   ==> type_size(t) == sizeof(float))    &&
+    (type_code(t) == GB_FP64_code   ==> type_size(t) == sizeof(double))   &&
+    (type_code(t) == GB_UDT_code    ==> type_size(t) == type_size(t)) ;
  */
 
 /*@
@@ -109,7 +135,7 @@
  
  logic set<char*> binaryop_fp{L}(GrB_BinaryOp o) =
     \union(o,
-           ((char*)o->function) + (0..sizeof(o->function)-1),
+           (char*)(o->function),
            o->ztype,
            o->xtype,
            o->ytype) ;
@@ -126,13 +152,13 @@
  
  predicate binaryop_fp_separated{L}(GrB_BinaryOp o) =
     \separated(o,
-               ((char*)o->function) + (0..sizeof(o->function)-1),
+               (char*)(o->function),
                o->ztype) &&
     \separated(o,
-               ((char*)o->function) + (0..sizeof(o->function)-1),
+               (char*)(o->function),
                o->xtype) &&
     \separated(o,
-               ((char*)o->function) + (0..sizeof(o->function)-1),
+               (char*)(o->function),
                o->ytype) ;
  */
 
@@ -140,7 +166,7 @@
  predicate binaryop_valid{L}(GrB_BinaryOp o) =
     \valid(o) &&
     binaryop_init(o) &&
-    \valid(((char*)binaryop_func(o)) + (0..sizeof(binaryop_func(o))-1)) &&
+    binaryop_func(o) != \null &&
     binaryop_code_valid(o) &&
     type_valid(binaryop_outtype(o)) &&
     type_valid(binaryop_in1type(o)) &&
@@ -429,7 +455,7 @@
         ) :
         (m->x == \null || m->i == \null ?
             \false :
-            ((m->p)[0] != 0 ? \false : \true)
+            (m->p)[0] == 0
             &&
             col_ptrs_valid :
                 (\forall int64_t j; 0 <= j < matrix_ncols(m) ==>
