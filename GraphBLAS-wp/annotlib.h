@@ -23,6 +23,626 @@
 
 /*@
  predicate magic_valid(int64_t magic) = magic == 0x00981B0787374E72 ;
+ 
+ predicate plus_mult_overflow{L}(size_t a, size_t b) =
+    (a != 0 && b != 0 && a > SIZE_MAX / 2) ||
+    (a != 0 && b != 0 && b > SIZE_MAX / 2) ||
+    (0 < a <= SIZE_MAX / 2 &&
+     0 < b <= SIZE_MAX / 2 &&
+     (a + b) > (SIZE_MAX / \min(a,b))) ;
+ 
+ predicate array_unchanged{L,T}(void *a, int c, int64_t n) =
+    (c == GB_INT32_code  ?
+        (\forall int64_t k; 0 <= k < n ==>
+            \at(((int32_t*)a)[k],L) == \at(((int32_t*)a)[k],T))
+        : \false
+    ) ;
+ 
+ predicate array_cast{L,T}(void *c, void *a, int c1, int c2, int64_t n) =
+    (c1 == c2 == GB_INT32_code  ?
+        (\forall int64_t k; 0 <= k < n ==>
+            \at(((int32_t*)c)[k],L) == \at(((int32_t*)a)[k],T))
+        : \false
+    ) ;
+ */
+
+/*
+ predicate array_unchanged{L,T}(void *a, int c, int64_t n) =
+    (c == GB_BOOL_code   ?
+        (\forall int64_t k; 0 <= k < n ==>
+            \at(((bool*)a)[k],L) == \at(((bool*)a)[k],T))         :
+    (c == GB_INT8_code   ?
+        (\forall int64_t k; 0 <= k < n ==>
+            \at(((int8_t*)a)[k],L) == \at(((int8_t*)a)[k],T))      :
+    (c == GB_UINT8_code  ?
+        (\forall int64_t k; 0 <= k < n ==>
+            \at(((uint8_t*)a)[k],L) == \at(((uint8_t*)a)[k],T))   :
+    (c == GB_INT16_code  ?
+        (\forall int64_t k; 0 <= k < n ==>
+            \at(((int16_t*)a)[k],L) == \at(((int16_t*)a)[k],T))   :
+    (c == GB_UINT16_code ?
+        (\forall int64_t k; 0 <= k < n ==>
+            \at(((uint16_t*)a)[k],L) == \at(((uint16_t*)a)[k],T)) :
+    (c == GB_INT32_code  ?
+        (\forall int64_t k; 0 <= k < n ==>
+            \at(((int32_t*)a)[k],L) == \at(((int32_t*)a)[k],T))   :
+    (c == GB_UINT32_code ?
+        (\forall int64_t k; 0 <= k < n ==>
+            \at(((uint32_t*)a)[k],L) == \at(((uint32_t*)a)[k],T)) :
+    (c == GB_INT64_code  ?
+        (\forall int64_t k; 0 <= k < n ==>
+            \at(((int64_t*)a)[k],L) == \at(((int64_t*)a)[k],T))   :
+    (c == GB_UINT64_code ?
+        (\forall int64_t k; 0 <= k < n ==>
+            \at(((uint64_t*)a)[k],L) == \at(((uint64_t*)a)[k],T)) :
+    (c == GB_FP32_code   ?
+        (\forall int64_t k; 0 <= k < n ==>
+            \at(((float*)a)[k],L) == \at(((float*)a)[k],T))       :
+    (c == GB_FP64_code   ?
+        (\forall int64_t k; 0 <= k < n ==>
+            \at(((double*)a)[k],L) == \at(((double*)a)[k],T))     :
+        \false
+    ))))))))))) ;
+ 
+ predicate array_cast{L,T}(void *c, void *a, int c1, int c2, int64_t n) =
+    (c1 == GB_BOOL_code   ?
+        (c2 == GB_BOOL_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((bool*)c)[k],L) == \at(((bool*)a)[k],T))           :
+        (c2 == GB_INT8_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((bool*)c)[k],L) == (bool)\at(((int8_t*)a)[k],T))   :
+        (c2 == GB_UINT8_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((bool*)c)[k],L) == (bool)\at(((uint8_t*)a)[k],T))  :
+        (c2 == GB_INT16_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((bool*)c)[k],L) == (bool)\at(((int16_t*)a)[k],T))  :
+        (c2 == GB_UINT16_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((bool*)c)[k],L) == (bool)\at(((uint16_t*)a)[k],T)) :
+        (c2 == GB_INT32_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((bool*)c)[k],L) == (bool)\at(((int32_t*)a)[k],T))  :
+        (c2 == GB_UINT32_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((bool*)c)[k],L) == (bool)\at(((uint32_t*)a)[k],T)) :
+        (c2 == GB_INT64_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((bool*)c)[k],L) == (bool)\at(((int64_t*)a)[k],T))  :
+        (c2 == GB_UINT64_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((bool*)c)[k],L) == (bool)\at(((uint64_t*)a)[k],T)) :
+        (c2 == GB_FP32_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((bool*)c)[k],L) == (bool)\at(((float*)a)[k],T))    :
+        (c2 == GB_FP64_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((bool*)c)[k],L) == (bool)\at(((double*)a)[k],T))   :
+            \false
+        ))))))))))) :
+    (c1 == GB_INT8_code   ?
+        (c2 == GB_BOOL_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int8_t*)c)[k],L) == (int8_t)\at(((bool*)a)[k],T))     :
+        (c2 == GB_INT8_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int8_t*)c)[k],L) == \at(((int8_t*)a)[k],T))           :
+        (c2 == GB_UINT8_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int8_t*)c)[k],L) == (int8_t)\at(((uint8_t*)a)[k],T))  :
+        (c2 == GB_INT16_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int8_t*)c)[k],L) == (int8_t)\at(((int16_t*)a)[k],T))  :
+        (c2 == GB_UINT16_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int8_t*)c)[k],L) == (int8_t)\at(((uint16_t*)a)[k],T)) :
+        (c2 == GB_INT32_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int8_t*)c)[k],L) == (int8_t)\at(((int32_t*)a)[k],T))  :
+        (c2 == GB_UINT32_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int8_t*)c)[k],L) == (int8_t)\at(((uint32_t*)a)[k],T)) :
+        (c2 == GB_INT64_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int8_t*)c)[k],L) == (int8_t)\at(((int64_t*)a)[k],T))  :
+        (c2 == GB_UINT64_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int8_t*)c)[k],L) == (int8_t)\at(((uint64_t*)a)[k],T)) :
+        (c2 == GB_FP32_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                    (\is_NaN(\at(((float*)a)[k],T)) ?
+                        \at(((int8_t*)c)[k],L) == 0 :
+                        (\is_infinite(\at(((float*)a)[k],T)) ?
+                            (\at(((float*)a)[k],T) > 0 ?
+                                \at(((int8_t*)c)[k],L) == INT8_MAX :
+                                \at(((int8_t*)c)[k],L) == INT8_MIN
+                            ) :
+                            \at(((int8_t*)c)[k],L) == ((int8_t)\at(((float*)a)[k],T))
+                        )
+                    )
+            ) :
+        (c2 == GB_FP64_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                    (\is_NaN(\at(((double*)a)[k],T)) ?
+                        \at(((int8_t*)c)[k],L) == 0 :
+                        (\is_infinite(\at(((double*)a)[k],T)) ?
+                            (\at(((double*)a)[k],T) > 0 ?
+                                \at(((int8_t*)c)[k],L) == INT8_MAX :
+                                \at(((int8_t*)c)[k],L) == INT8_MIN
+                            ) :
+                            \at(((int8_t*)c)[k],L) == ((int8_t)\at(((double*)a)[k],T))
+                        )
+                    )
+            ) :
+            \false
+        ))))))))))) :
+    (c1 == GB_UINT8_code  ?
+        (c2 == GB_BOOL_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint8_t*)c)[k],L) == (uint8_t)\at(((bool*)a)[k],T))     :
+        (c2 == GB_INT8_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint8_t*)c)[k],L) == (uint8_t)\at(((int8_t*)a)[k],T))   :
+        (c2 == GB_UINT8_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint8_t*)c)[k],L) == \at(((uint8_t*)a)[k],T))           :
+        (c2 == GB_INT16_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint8_t*)c)[k],L) == (uint8_t)\at(((int16_t*)a)[k],T))  :
+        (c2 == GB_UINT16_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint8_t*)c)[k],L) == (uint8_t)\at(((uint16_t*)a)[k],T)) :
+        (c2 == GB_INT32_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint8_t*)c)[k],L) == (uint8_t)\at(((int32_t*)a)[k],T))  :
+        (c2 == GB_UINT32_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint8_t*)c)[k],L) == (uint8_t)\at(((uint32_t*)a)[k],T)) :
+        (c2 == GB_INT64_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint8_t*)c)[k],L) == (uint8_t)\at(((int64_t*)a)[k],T))  :
+        (c2 == GB_UINT64_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint8_t*)c)[k],L) == (uint8_t)\at(((uint64_t*)a)[k],T)) :
+        (c2 == GB_FP32_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                    (\is_NaN(\at(((float*)a)[k],T)) ?
+                        \at(((uint8_t*)c)[k],L) == 0 :
+                        (\is_infinite(\at(((float*)a)[k],T)) ?
+                            (\at(((float*)a)[k],T) > 0 ?
+                                \at(((uint8_t*)c)[k],L) == UINT8_MAX :
+                                \at(((uint8_t*)c)[k],L) == 0
+                            ) :
+                            \at(((uint8_t*)c)[k],L) == ((uint8_t)\at(((float*)a)[k],T))
+                        )
+                    )
+            ) :
+        (c2 == GB_FP64_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                    (\is_NaN(\at(((double*)a)[k],T)) ?
+                        \at(((uint8_t*)c)[k],L) == 0 :
+                        (\is_infinite(\at(((double*)a)[k],T)) ?
+                            (\at(((double*)a)[k],T) > 0 ?
+                                \at(((uint8_t*)c)[k],L) == UINT8_MAX :
+                                \at(((uint8_t*)c)[k],L) == 0
+                            ) :
+                            \at(((uint8_t*)c)[k],L) == ((uint8_t)\at(((double*)a)[k],T))
+                        )
+                    )
+            ) :
+            \false
+        ))))))))))) :
+    (c1 == GB_INT16_code  ?
+        (c2 == GB_BOOL_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int16_t*)c)[k],L) == (int16_t)\at(((bool*)a)[k],T))     :
+        (c2 == GB_INT8_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int16_t*)c)[k],L) == (int16_t)\at(((int8_t*)a)[k],T))   :
+        (c2 == GB_UINT8_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int16_t*)c)[k],L) == (int16_t)\at(((uint8_t*)a)[k],T))  :
+        (c2 == GB_INT16_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int16_t*)c)[k],L) == \at(((int16_t*)a)[k],T))           :
+        (c2 == GB_UINT16_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int16_t*)c)[k],L) == (int16_t)\at(((uint16_t*)a)[k],T)) :
+        (c2 == GB_INT32_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int16_t*)c)[k],L) == (int16_t)\at(((int32_t*)a)[k],T))  :
+        (c2 == GB_UINT32_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int16_t*)c)[k],L) == (int16_t)\at(((uint32_t*)a)[k],T)) :
+        (c2 == GB_INT64_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int16_t*)c)[k],L) == (int16_t)\at(((int64_t*)a)[k],T))  :
+        (c2 == GB_UINT64_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int16_t*)c)[k],L) == (int16_t)\at(((uint64_t*)a)[k],T)) :
+        (c2 == GB_FP32_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                    (\is_NaN(\at(((float*)a)[k],T)) ?
+                        \at(((int16_t*)c)[k],L) == 0 :
+                        (\is_infinite(\at(((float*)a)[k],T)) ?
+                            (\at(((float*)a)[k],T) > 0 ?
+                                \at(((int16_t*)c)[k],L) == INT16_MAX :
+                                \at(((int16_t*)c)[k],L) == INT16_MIN
+                            ) :
+                            \at(((int16_t*)c)[k],L) == ((int16_t)\at(((float*)a)[k],T))
+                        )
+                    )
+            ) :
+        (c2 == GB_FP64_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                    (\is_NaN(\at(((double*)a)[k],T)) ?
+                        \at(((int16_t*)c)[k],L) == 0 :
+                        (\is_infinite(\at(((double*)a)[k],T)) ?
+                            (\at(((double*)a)[k],T) > 0 ?
+                                \at(((int16_t*)c)[k],L) == INT16_MAX :
+                                \at(((int16_t*)c)[k],L) == INT16_MIN
+                            ) :
+                            \at(((int16_t*)c)[k],L) == ((int16_t)\at(((double*)a)[k],T))
+                        )
+                    )
+            ) :
+            \false
+        ))))))))))) :
+    (c1 == GB_UINT16_code ?
+        (c2 == GB_BOOL_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint16_t*)c)[k],L) == (uint16_t)\at(((bool*)a)[k],T))     :
+        (c2 == GB_INT8_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint16_t*)c)[k],L) == (uint16_t)\at(((int8_t*)a)[k],T))   :
+        (c2 == GB_UINT8_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint16_t*)c)[k],L) == (uint16_t)\at(((uint8_t*)a)[k],T))  :
+        (c2 == GB_INT16_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint16_t*)c)[k],L) == (uint16_t)\at(((int16_t*)a)[k],T))  :
+        (c2 == GB_UINT16_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint16_t*)c)[k],L) == \at(((uint16_t*)a)[k],T)) :
+        (c2 == GB_INT32_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint16_t*)c)[k],L) == (uint16_t)\at(((int32_t*)a)[k],T))  :
+        (c2 == GB_UINT32_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint16_t*)c)[k],L) == (uint16_t)\at(((uint32_t*)a)[k],T)) :
+        (c2 == GB_INT64_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint16_t*)c)[k],L) == (uint16_t)\at(((int64_t*)a)[k],T))  :
+        (c2 == GB_UINT64_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint16_t*)c)[k],L) == (uint16_t)\at(((uint64_t*)a)[k],T)) :
+        (c2 == GB_FP32_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                    (\is_NaN(\at(((float*)a)[k],T)) ?
+                        \at(((uint16_t*)c)[k],L) == 0 :
+                        (\is_infinite(\at(((float*)a)[k],T)) ?
+                            (\at(((float*)a)[k],T) > 0 ?
+                                \at(((uint16_t*)c)[k],L) == UINT16_MAX :
+                                \at(((uint16_t*)c)[k],L) == 0
+                            ) :
+                            \at(((uint16_t*)c)[k],L) == ((uint16_t)\at(((float*)a)[k],T))
+                        )
+                    )
+            ) :
+        (c2 == GB_FP64_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                    (\is_NaN(\at(((double*)a)[k],T)) ?
+                        \at(((uint16_t*)c)[k],L) == 0 :
+                        (\is_infinite(\at(((double*)a)[k],T)) ?
+                            (\at(((double*)a)[k],T) > 0 ?
+                                \at(((uint16_t*)c)[k],L) == UINT16_MAX :
+                                \at(((uint16_t*)c)[k],L) == 0
+                            ) :
+                            \at(((uint16_t*)c)[k],L) == ((uint16_t)\at(((double*)a)[k],T))
+                        )
+                    )
+            ) :
+            \false
+        ))))))))))) :
+    (c1 == GB_INT32_code  ?
+        (c2 == GB_BOOL_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int32_t*)c)[k],L) == (int32_t)\at(((bool*)a)[k],T))     :
+        (c2 == GB_INT8_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int32_t*)c)[k],L) == (int32_t)\at(((int8_t*)a)[k],T))   :
+        (c2 == GB_UINT8_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int32_t*)c)[k],L) == (int32_t)\at(((uint8_t*)a)[k],T))  :
+        (c2 == GB_INT16_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int32_t*)c)[k],L) == (int32_t)\at(((int16_t*)a)[k],T))  :
+        (c2 == GB_UINT16_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int32_t*)c)[k],L) == (int32_t)\at(((uint16_t*)a)[k],T)) :
+        (c2 == GB_INT32_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int32_t*)c)[k],L) == \at(((int32_t*)a)[k],T))           :
+        (c2 == GB_UINT32_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int32_t*)c)[k],L) == (int32_t)\at(((uint32_t*)a)[k],T)) :
+        (c2 == GB_INT64_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int32_t*)c)[k],L) == (int32_t)\at(((int64_t*)a)[k],T))  :
+        (c2 == GB_UINT64_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int32_t*)c)[k],L) == (int32_t)\at(((uint64_t*)a)[k],T)) :
+        (c2 == GB_FP32_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                    (\is_NaN(\at(((float*)a)[k],T)) ?
+                        \at(((int32_t*)c)[k],L) == 0 :
+                        (\is_infinite(\at(((float*)a)[k],T)) ?
+                            (\at(((float*)a)[k],T) > 0 ?
+                                \at(((int32_t*)c)[k],L) == INT32_MAX :
+                                \at(((int32_t*)c)[k],L) == INT32_MIN
+                            ) :
+                            \at(((int32_t*)c)[k],L) == ((int32_t)\at(((float*)a)[k],T))
+                        )
+                    )
+            ) :
+        (c2 == GB_FP64_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                    (\is_NaN(\at(((double*)a)[k],T)) ?
+                        \at(((int32_t*)c)[k],L) == 0 :
+                        (\is_infinite(\at(((double*)a)[k],T)) ?
+                            (\at(((double*)a)[k],T) > 0 ?
+                                \at(((int32_t*)c)[k],L) == INT32_MAX :
+                                \at(((int32_t*)c)[k],L) == INT32_MIN
+                            ) :
+                            \at(((int32_t*)c)[k],L) == ((int32_t)\at(((double*)a)[k],T))
+                        )
+                    )
+            ) :
+            \false
+        ))))))))))) :
+    (c1 == GB_UINT32_code ?
+        (c2 == GB_BOOL_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint32_t*)c)[k],L) == (uint32_t)\at(((bool*)a)[k],T))     :
+        (c2 == GB_INT8_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint32_t*)c)[k],L) == (uint32_t)\at(((int8_t*)a)[k],T))   :
+        (c2 == GB_UINT8_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint32_t*)c)[k],L) == (uint32_t)\at(((uint8_t*)a)[k],T))  :
+        (c2 == GB_INT16_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint32_t*)c)[k],L) == (uint32_t)\at(((int16_t*)a)[k],T))  :
+        (c2 == GB_UINT16_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint32_t*)c)[k],L) == (uint32_t)\at(((uint16_t*)a)[k],T)) :
+        (c2 == GB_INT32_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint32_t*)c)[k],L) == (uint32_t)\at(((int32_t*)a)[k],T))  :
+        (c2 == GB_UINT32_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint32_t*)c)[k],L) == \at(((uint32_t*)a)[k],T))           :
+        (c2 == GB_INT64_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint32_t*)c)[k],L) == (uint32_t)\at(((int64_t*)a)[k],T))  :
+        (c2 == GB_UINT64_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint32_t*)c)[k],L) == (uint32_t)\at(((uint64_t*)a)[k],T)) :
+        (c2 == GB_FP32_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                    (\is_NaN(\at(((float*)a)[k],T)) ?
+                        \at(((uint32_t*)c)[k],L) == 0 :
+                        (\is_infinite(\at(((float*)a)[k],T)) ?
+                            (\at(((float*)a)[k],T) > 0 ?
+                                \at(((uint32_t*)c)[k],L) == UINT32_MAX :
+                                \at(((uint32_t*)c)[k],L) == 0
+                            ) :
+                            \at(((uint32_t*)c)[k],L) == ((uint32_t)\at(((float*)a)[k],T))
+                        )
+                    )
+            ) :
+        (c2 == GB_FP64_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                    (\is_NaN(\at(((double*)a)[k],T)) ?
+                        \at(((uint32_t*)c)[k],L) == 0 :
+                        (\is_infinite(\at(((double*)a)[k],T)) ?
+                            (\at(((double*)a)[k],T) > 0 ?
+                                \at(((uint32_t*)c)[k],L) == UINT32_MAX :
+                                \at(((uint32_t*)c)[k],L) == 0
+                            ) :
+                            \at(((uint32_t*)c)[k],L) == ((uint32_t)\at(((double*)a)[k],T))
+                        )
+                    )
+            ) :
+            \false
+        ))))))))))) :
+    (c1 == GB_INT64_code  ?
+        (c2 == GB_BOOL_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int64_t*)c)[k],L) == (int64_t)\at(((bool*)a)[k],T))     :
+        (c2 == GB_INT8_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int64_t*)c)[k],L) == (int64_t)\at(((int8_t*)a)[k],T))   :
+        (c2 == GB_UINT8_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int64_t*)c)[k],L) == (int64_t)\at(((uint8_t*)a)[k],T))  :
+        (c2 == GB_INT16_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int64_t*)c)[k],L) == (int64_t)\at(((int16_t*)a)[k],T))  :
+        (c2 == GB_UINT16_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int64_t*)c)[k],L) == (int64_t)\at(((uint16_t*)a)[k],T)) :
+        (c2 == GB_INT32_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int64_t*)c)[k],L) == (int64_t)\at(((int32_t*)a)[k],T))  :
+        (c2 == GB_UINT32_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int64_t*)c)[k],L) == (int64_t)\at(((uint32_t*)a)[k],T)) :
+        (c2 == GB_INT64_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int64_t*)c)[k],L) == \at(((int64_t*)a)[k],T))           :
+        (c2 == GB_UINT64_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((int64_t*)c)[k],L) == (int64_t)\at(((uint64_t*)a)[k],T)) :
+        (c2 == GB_FP32_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                    (\is_NaN(\at(((float*)a)[k],T)) ?
+                        \at(((int64_t*)c)[k],L) == 0 :
+                        (\is_infinite(\at(((float*)a)[k],T)) ?
+                            (\at(((float*)a)[k],T) > 0 ?
+                                \at(((int64_t*)c)[k],L) == INT64_MAX :
+                                \at(((int64_t*)c)[k],L) == INT64_MIN
+                            ) :
+                            \at(((int64_t*)c)[k],L) == ((int64_t)\at(((float*)a)[k],T))
+                        )
+                    )
+            ) :
+        (c2 == GB_FP64_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                    (\is_NaN(\at(((double*)a)[k],T)) ?
+                        \at(((int64_t*)c)[k],L) == 0 :
+                        (\is_infinite(\at(((double*)a)[k],T)) ?
+                            (\at(((double*)a)[k],T) > 0 ?
+                                \at(((int64_t*)c)[k],L) == INT64_MAX :
+                                \at(((int64_t*)c)[k],L) == INT64_MIN
+                            ) :
+                            \at(((int64_t*)c)[k],L) == ((int64_t)\at(((double*)a)[k],T))
+                        )
+                    )
+            ) :
+            \false
+        ))))))))))) :
+    (c1 == GB_UINT64_code ?
+        (c2 == GB_BOOL_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint64_t*)c)[k],L) == (uint64_t)\at(((bool*)a)[k],T))     :
+        (c2 == GB_INT8_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint64_t*)c)[k],L) == (uint64_t)\at(((int8_t*)a)[k],T))   :
+        (c2 == GB_UINT8_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint64_t*)c)[k],L) == (uint64_t)\at(((uint8_t*)a)[k],T))  :
+        (c2 == GB_INT16_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint64_t*)c)[k],L) == (uint64_t)\at(((int16_t*)a)[k],T))  :
+        (c2 == GB_UINT16_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint64_t*)c)[k],L) == (uint64_t)\at(((uint16_t*)a)[k],T)) :
+        (c2 == GB_INT32_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint64_t*)c)[k],L) == (uint64_t)\at(((int32_t*)a)[k],T))  :
+        (c2 == GB_UINT32_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint64_t*)c)[k],L) == (uint64_t)\at(((uint32_t*)a)[k],T)) :
+        (c2 == GB_INT64_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint64_t*)c)[k],L) == (uint64_t)\at(((int64_t*)a)[k],T))  :
+        (c2 == GB_UINT64_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((uint64_t*)c)[k],L) == \at(((uint64_t*)a)[k],T))           :
+        (c2 == GB_FP32_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                    (\is_NaN(\at(((float*)a)[k],T)) ?
+                        \at(((uint64_t*)c)[k],L) == 0 :
+                        (\is_infinite(\at(((float*)a)[k],T)) ?
+                            (\at(((float*)a)[k],T) > 0 ?
+                                \at(((uint64_t*)c)[k],L) == UINT64_MAX :
+                                \at(((uint64_t*)c)[k],L) == 0
+                            ) :
+                            \at(((uint64_t*)c)[k],L) == ((uint64_t)\at(((float*)a)[k],T))
+                        )
+                    )
+            ) :
+        (c2 == GB_FP64_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                    (\is_NaN(\at(((double*)a)[k],T)) ?
+                        \at(((uint64_t*)c)[k],L) == 0 :
+                        (\is_infinite(\at(((double*)a)[k],T)) ?
+                            (\at(((double*)a)[k],T) > 0 ?
+                                \at(((uint64_t*)c)[k],L) == UINT64_MAX :
+                                \at(((uint64_t*)c)[k],L) == 0
+                            ) :
+                            \at(((uint64_t*)c)[k],L) == ((uint64_t)\at(((double*)a)[k],T))
+                        )
+                    )
+            ) :
+            \false
+        ))))))))))) :
+    (c1 == GB_FP32_code   ?
+        (c2 == GB_BOOL_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((float*)c)[k],L) == (float)\at(((bool*)a)[k],T))     :
+        (c2 == GB_INT8_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((float*)c)[k],L) == (float)\at(((int8_t*)a)[k],T))   :
+        (c2 == GB_UINT8_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((float*)c)[k],L) == (float)\at(((uint8_t*)a)[k],T))  :
+        (c2 == GB_INT16_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((float*)c)[k],L) == (float)\at(((int16_t*)a)[k],T))  :
+        (c2 == GB_UINT16_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((float*)c)[k],L) == (float)\at(((uint16_t*)a)[k],T)) :
+        (c2 == GB_INT32_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((float*)c)[k],L) == (float)\at(((int32_t*)a)[k],T))  :
+        (c2 == GB_UINT32_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((float*)c)[k],L) == (float)\at(((uint32_t*)a)[k],T)) :
+        (c2 == GB_INT64_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((float*)c)[k],L) == (float)\at(((int64_t*)a)[k],T))  :
+        (c2 == GB_UINT64_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((float*)c)[k],L) == (float)\at(((uint64_t*)a)[k],T)) :
+        (c2 == GB_FP32_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((float*)c)[k],L) == \at(((float*)a)[k],T))           :
+        (c2 == GB_FP64_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((float*)c)[k],L) == (float)\at(((double*)a)[k],T))   :
+            \false
+        ))))))))))) :
+    (c1 == GB_FP64_code   ?
+        (c2 == GB_BOOL_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((double*)c)[k],L) == (double)\at(((bool*)a)[k],T))     :
+        (c2 == GB_INT8_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((double*)c)[k],L) == (double)\at(((int8_t*)a)[k],T))   :
+        (c2 == GB_UINT8_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((double*)c)[k],L) == (double)\at(((uint8_t*)a)[k],T))  :
+        (c2 == GB_INT16_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((double*)c)[k],L) == (double)\at(((int16_t*)a)[k],T))  :
+        (c2 == GB_UINT16_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((double*)c)[k],L) == (double)\at(((uint16_t*)a)[k],T)) :
+        (c2 == GB_INT32_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((double*)c)[k],L) == (double)\at(((int32_t*)a)[k],T))  :
+        (c2 == GB_UINT32_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((double*)c)[k],L) == (double)\at(((uint32_t*)a)[k],T)) :
+        (c2 == GB_INT64_code  ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((double*)c)[k],L) == (double)\at(((int64_t*)a)[k],T))  :
+        (c2 == GB_UINT64_code ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((double*)c)[k],L) == (double)\at(((uint64_t*)a)[k],T)) :
+        (c2 == GB_FP32_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((double*)c)[k],L) == (double)\at(((float*)a)[k],T))    :
+        (c2 == GB_FP64_code   ?
+            (\forall int64_t k; 0 <= k < n ==>
+                \at(((double*)c)[k],L) == \at(((double*)a)[k],T))           :
+            \false
+        ))))))))))) :
+        \false
+    ))))))))))) ;
  */
 
 //------------------------------------------------------------------------------
@@ -34,6 +654,45 @@
  logic int type_code{L}(GrB_Type t) = t->code ;
  
  logic size_t type_size{L}(GrB_Type t) = t->size ;
+ 
+ // ignore user defined types by returning 0; don't know size of user
+ // defined types without full GrB_Type; this is used
+ // where the Type code is available only
+ logic size_t type_size{L}(int c) =
+    (c == GB_BOOL_code   ?
+        (size_t)sizeof(bool)     :
+    (c == GB_INT8_code   ?
+        (size_t)sizeof(int8_t)   :
+    (c == GB_UINT8_code  ?
+        (size_t)sizeof(uint8_t)  :
+    (c == GB_INT16_code  ?
+        (size_t)sizeof(int16_t)  :
+    (c == GB_UINT16_code ?
+        (size_t)sizeof(uint16_t) :
+    (c == GB_INT32_code  ?
+        (size_t)sizeof(int32_t)  :
+    (c == GB_UINT32_code ?
+        (size_t)sizeof(uint32_t) :
+    (c == GB_INT64_code  ?
+        (size_t)sizeof(int64_t)  :
+    (c == GB_UINT64_code ?
+        (size_t)sizeof(uint64_t) :
+    (c == GB_FP32_code   ?
+        (size_t)sizeof(float)    :
+    (c == GB_FP64_code   ?
+        (size_t)sizeof(double)   :
+        (size_t)0
+    ))))))))))) ;
+ 
+ predicate type_code_compatible{L,T}(int c1, int c2) =
+    ((c1 == GB_UDT_code || c2 == GB_UDT_code) ?
+        c1 == c2 : true
+    ) ;
+ 
+ predicate type_compatible{L,T}(GrB_Type t1, GrB_Type t2) =
+    ((type_code{L}(t1) == GB_UDT_code || type_code{T}(t2) == GB_UDT_code) ?
+        t1 == t2 : true
+    ) ;
  
  predicate type_init{L}(GrB_Type t) = magic_valid(t->magic) ;
  */
@@ -345,6 +1004,8 @@
  
  logic GrB_Type matrix_type{L}(GrB_Matrix m) = m->type ;
  
+ logic int64_t nnz{L}(GrB_Matrix m) = ((matrix_nvals(m) > 0) ? (m->p)[matrix_ncols(m)] : (int64_t)0) ;
+ 
  logic set<char*> matrix_fp{L}(GrB_Matrix m) =
     \union(m,
            m->type,
@@ -442,7 +1103,7 @@
         )
     ) ;
  
- // check p, i, x, pix pendings, and zombies
+ // check p, i, x, pix pendings, zombies, and matrix queue (sort of for the queue)
  predicate matrix_storage_valid{L}(GrB_Matrix m) =
     \valid(m->p + (0..(matrix_ncols(m)+1)-1))
     &&
@@ -471,7 +1132,14 @@
     &&
     0 <= m->nzombies <= (m->p)[matrix_ncols(m)]
     &&
-    pending_tuples_valid(m) ;
+    pending_tuples_valid(m)
+    &&
+    (m->enqueued == \false ?
+        (m->queue_next == \null &&
+         m->queue_prev == \null
+        ) :
+        \true
+    ) ;
  
  predicate matrix_fp_separated{L}(GrB_Matrix m) =
     \separated(m,
@@ -485,6 +1153,62 @@
                m->operator_pending,
                ((GrB_Matrix)m->queue_next),
                ((GrB_Matrix)m->queue_prev)) ;
+ 
+ predicate matrix_malloc_init{L}(GrB_Matrix m) = m->magic == 0x10981B0787374E72 ;
+ 
+ predicate freeable_storage{L}(GrB_Matrix m) =
+    (!(m->p_shallow) && m->p != \null ==> \freeable(m->p)) &&
+    (!(m->i_shallow) && m->i != \null ==> \freeable(m->i)) &&
+    (!(m->x_shallow) && m->x != \null ==> \freeable(m->x)) &&
+    (m->ipending != \null ==> \freeable(m->ipending)) &&
+    (m->jpending != \null ==> \freeable(m->jpending)) &&
+    (m->xpending != \null ==> \freeable(m->xpending)) ;
+ 
+ // valid matrix except for column array being allocated but not initialized
+ // m->p_shallow will most likely be false if this is true, but not necessarily
+ predicate matrix_malloc_valid{L}(GrB_Matrix m) =
+    \valid(m)                                 &&
+    matrix_malloc_init(m)                     &&
+    0 < matrix_nrows(m) <= (1ULL << 60)       &&
+    0 < matrix_ncols(m) <= (1ULL << 60)       &&
+    type_valid(matrix_type(m))                &&
+    \valid(m->p + (0..(matrix_ncols(m)+1)-1)) &&
+    matrix_nvals(m) == 0                      &&
+    m->i == \null                             &&
+    m->x == \null                             &&
+    m->i_shallow == \false                    &&
+    m->x_shallow == \false                    &&
+    m->nzombies == 0                          &&
+    pending_tuples_valid(m)                   &&
+    (m->enqueued == \false ?
+        (m->queue_next == \null &&
+         m->queue_prev == \null
+        ) :
+        \true
+    )                                         &&
+    matrix_fp_separated(m) ;
+ 
+ // doesn't include p, because p may be null, allocated but not initialized,
+ // or both allocated and initialized by the end of the call to GB_new
+ predicate matrix_storage_init{L}(GrB_Matrix m) =
+    \valid(m)                    &&
+    matrix_nvals(m) == 0         &&
+    m->i == \null                &&
+    m->x == \null                &&
+    m->p_shallow == \false       &&
+    m->i_shallow == \false       &&
+    m->x_shallow == \false       &&
+    m->npending == 0             &&
+    m->max_npending == 0         &&
+    m->sorted_pending == \true   &&
+    m->operator_pending == \null &&
+    m->ipending == \null         &&
+    m->jpending == \null         &&
+    m->xpending == \null         &&
+    m->queue_next == \null       &&
+    m->queue_prev == \null       &&
+    m->enqueued == \false        &&
+    m->nzombies == 0 ;
  */
 
 /*@
@@ -492,9 +1216,9 @@
  predicate matrix_valid{L}(GrB_Matrix m) =
     \valid(m) &&
     matrix_init(m) &&
-    0 < matrix_nrows(m) <= ((GrB_Index)(1ULL << 60)) &&
-    0 < matrix_ncols(m) <= ((GrB_Index)(1ULL << 60)) &&
-    0 <= matrix_nvals(m) <= ((GrB_Index)(1ULL << 60)) &&
+    0 < matrix_nrows(m) <= (1ULL << 60) &&
+    0 < matrix_ncols(m) <= (1ULL << 60) &&
+    0 <= matrix_nvals(m) <= (1ULL << 60) &&
     type_valid(matrix_type(m)) &&
     matrix_storage_valid(m) &&
     matrix_fp_separated(m) ;

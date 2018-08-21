@@ -5,12 +5,45 @@
 // SuiteSparse:GraphBLAS, Timothy A. Davis, (c) 2017-2018, All Rights Reserved.
 // http://suitesparse.com   See GraphBLAS/Doc/License.txt for license.
 
+// *** JENNA ANNOTATION 7/29/18 ***
+// GB_size_t_multiply
+
 //------------------------------------------------------------------------------
 
 // c = a*b but check for overflow
 
 #include "GB.h"
+#include "annotlib.h" // for common predicates & logic functions
 
+/*@
+ requires c != \null ;
+ requires \valid(c) ;
+ assigns *c ;
+ behavior a_or_b_zero:
+    assumes a == 0 || b == 0 ;
+    ensures \result == \true ;
+    ensures *c == 0 ;
+ behavior a_plus_b_not_safe:
+    assumes a != 0 ;
+    assumes b != 0 ;
+    assumes (a > SIZE_MAX / 2 || b > SIZE_MAX / 2) ;
+    ensures \result == \false ;
+    ensures *c == 0 ;
+ behavior a_times_b_overflows:
+    assumes 0 < a <= SIZE_MAX / 2 ;
+    assumes 0 < b <= SIZE_MAX / 2 ;
+    assumes (a + b) > (SIZE_MAX / \min(a,b)) ;
+    ensures \result == \false ;
+    ensures *c == 0 ;
+ behavior a_times_b_computed:
+    assumes 0 < a <= SIZE_MAX / 2 ;
+    assumes 0 < b <= SIZE_MAX / 2 ;
+    assumes (a + b) <= (SIZE_MAX / \min(a,b)) ;
+    ensures \result == \true ;
+    ensures *c == (size_t)(a * b) ;
+ complete behaviors ;
+ disjoint behaviors ;
+ */
 bool GB_size_t_multiply     // true if ok, false if overflow
 (
     size_t *c,              // c = a*b, or zero if overflow occurs

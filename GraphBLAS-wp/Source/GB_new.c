@@ -5,6 +5,9 @@
 // SuiteSparse:GraphBLAS, Timothy A. Davis, (c) 2017-2018, All Rights Reserved.
 // http://suitesparse.com   See GraphBLAS/Doc/License.txt for license.
 
+// *** JENNA ANNOTATION 7/29/18 ***
+// GB_new
+
 //------------------------------------------------------------------------------
 
 // This function is not user-callable.
@@ -219,7 +222,94 @@
 //------------------------------------------------------------------------------
 
 #include "GB.h"
+#include "annotlib.h" // for common predicates & logic functions
 
+/*@
+ requires \valid(matrix_handle) ;
+ requires type_valid(type) ;
+ requires nrows <= ((GrB_Index)(1ULL << 60)) ;
+ requires ncols <= ((GrB_Index)(1ULL << 60)) ;
+ requires \separated(&GB_thread_local,\union(matrix_handle,type)) ;
+ requires \separated(GB_thread_local.file,\union(matrix_handle,type)) ;
+ requires \separated(matrix_handle,type) ;
+ 
+ allocates *matrix_handle ;
+ allocates \at((*matrix_handle),Post)->p ;
+ 
+ assigns __fc_heap_status ;
+ 
+ assigns GB_thread_local.file ;
+ assigns GB_thread_local.line ;
+ assigns GB_thread_local.info ;
+ 
+ assigns *matrix_handle ;
+ assigns \at((*matrix_handle),Post)->magic ;
+ assigns \at((*matrix_handle),Post)->type ;
+ assigns \at((*matrix_handle),Post)->nrows ;
+ assigns \at((*matrix_handle),Post)->ncols ;
+ assigns \at((*matrix_handle),Post)->nzmax ;
+ assigns \at((*matrix_handle),Post)->p ;
+ assigns \at((*matrix_handle),Post)->i ;
+ assigns \at((*matrix_handle),Post)->x ;
+ assigns \at((*matrix_handle),Post)->p_shallow ;
+ assigns \at((*matrix_handle),Post)->i_shallow ;
+ assigns \at((*matrix_handle),Post)->x_shallow ;
+ assigns \at((*matrix_handle),Post)->npending ;
+ assigns \at((*matrix_handle),Post)->max_npending ;
+ assigns \at((*matrix_handle),Post)->sorted_pending ;
+ assigns \at((*matrix_handle),Post)->operator_pending ;
+ assigns \at((*matrix_handle),Post)->ipending ;
+ assigns \at((*matrix_handle),Post)->jpending ;
+ assigns \at((*matrix_handle),Post)->xpending ;
+ assigns \at((*matrix_handle),Post)->queue_next ;
+ assigns \at((*matrix_handle),Post)->queue_prev ;
+ assigns \at((*matrix_handle),Post)->enqueued ;
+ assigns \at((*matrix_handle),Post)->nzombies ;
+ 
+ ensures (\result == GrB_SUCCESS       ||
+          \result == GrB_OUT_OF_MEMORY) ;
+ ensures (\result == GrB_OUT_OF_MEMORY ==> *matrix_handle == \null) ;
+ ensures (\result == GrB_SUCCESS ==>
+            matrix_type(*matrix_handle) == type            &&
+            matrix_nrows(*matrix_handle) == (int64_t)nrows &&
+            matrix_ncols(*matrix_handle) == (int64_t)ncols &&
+            matrix_nvals(*matrix_handle) == 0              &&
+            matrix_storage_init(*matrix_handle)            &&
+            \at(*matrix_handle,Pre) != *matrix_handle      &&
+            \freeable(*matrix_handle)) ;
+ 
+ behavior no_calloc_or_malloc:
+    assumes Ap_calloc == \false ;
+    assumes Ap_malloc == \false ;
+    ensures \result == GrB_SUCCESS ==>
+                (*matrix_handle)->p == \null           &&
+                matrix_malloc_init(*matrix_handle)     &&
+                !matrix_malloc_valid(*matrix_handle)   &&
+                !matrix_init(*matrix_handle)           &&
+                !matrix_valid(*matrix_handle) ;
+ 
+ behavior calloc:
+    assumes Ap_calloc == \true ;
+    ensures \result == GrB_SUCCESS ==>
+                !matrix_malloc_init(*matrix_handle)  &&
+                !matrix_malloc_valid(*matrix_handle) &&
+                matrix_init(*matrix_handle)          &&
+                matrix_valid(*matrix_handle)         &&
+                freeable_storage(*matrix_handle) ;
+ 
+ behavior malloc:
+    assumes Ap_calloc == \false ;
+    assumes Ap_malloc == \true ;
+    ensures \result == GrB_SUCCESS ==>
+                matrix_malloc_init(*matrix_handle)  &&
+                matrix_malloc_valid(*matrix_handle) &&
+                !matrix_init(*matrix_handle)        &&
+                !matrix_valid(*matrix_handle)       &&
+                freeable_storage(*matrix_handle) ;
+ 
+ complete behaviors ;
+ disjoint behaviors ;
+ */
 GrB_Info GB_new                 // create a new matrix
 (
     GrB_Matrix *matrix_handle,  // handle of matrix to create
@@ -252,7 +342,7 @@ GrB_Info GB_new                 // create a new matrix
         // out of memory
         return (ERROR (GrB_OUT_OF_MEMORY, (LOG, "out of memory"))) ;
     }
-
+    
     // initialize the matrix
     GrB_Matrix A = *matrix_handle ;
     A->type = type ;
