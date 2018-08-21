@@ -101,6 +101,7 @@
             \freeable(*shallow_cast_handle)                       &&
             freeable_storage(*shallow_cast_handle)                &&
             matrix_valid(A)) ;
+ 
  behavior A_nzmax_zero :
     assumes matrix_nvals(A) == 0 ;
     ensures (\result == GrB_SUCCESS ==>
@@ -109,6 +110,7 @@
                 (*shallow_cast_handle)->x == \null          &&
                 (*shallow_cast_handle)->i_shallow == \false &&
                 (*shallow_cast_handle)->x_shallow == \false) ;
+ 
  behavior matrix_types_same :
     assumes matrix_nvals(A) >= \max(nnz(A),1) ;
     assumes ctype == matrix_type(A) ;
@@ -118,22 +120,24 @@
                 (*shallow_cast_handle)->x == A->x                     &&
                 (*shallow_cast_handle)->i_shallow == \true            &&
                 (*shallow_cast_handle)->x_shallow == \true) ;
+ 
  behavior matrix_types_not_same :
     assumes matrix_nvals(A) >= \max(nnz(A),1) ;
     assumes ctype != matrix_type(A) ;
     ensures (\result == GrB_SUCCESS ==>
-                matrix_nvals(*shallow_cast_handle) == \max(nnz(A),1)   &&
-                (*shallow_cast_handle)->i == A->i                      &&
+                matrix_nvals(*shallow_cast_handle) == (int64_t)\max(nnz(A),1)   &&
+                (*shallow_cast_handle)->i == A->i                               &&
                 array_unchanged{Pre,Here}(A->x,
                                           type_code(matrix_type(A)),
-                                          nnz(A))                      &&
+                                          nnz(A))                               &&
                 array_cast{Here,Pre}((*shallow_cast_handle)->x,
                                      A->x,
                                      type_code(matrix_type(*shallow_cast_handle)),
                                      type_code(matrix_type(A)),
-                                     nnz(A))                           &&
-                (*shallow_cast_handle)->i_shallow == \true             &&
+                                     nnz(A))                                    &&
+                (*shallow_cast_handle)->i_shallow == \true                      &&
                 (*shallow_cast_handle)->x_shallow == \false) ;
+ 
  complete behaviors ;
  disjoint behaviors ;
  */
@@ -167,6 +171,7 @@ GrB_Info GB_shallow_cast                // create a shallow typecasted matrix
     {
         return (info) ;
     }
+    
     GrB_Matrix C = *shallow_cast_handle ;
 
     //--------------------------------------------------------------------------

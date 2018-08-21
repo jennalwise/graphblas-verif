@@ -32,6 +32,22 @@
      (a + b) > (SIZE_MAX / \min(a,b))) ;
  
  predicate array_unchanged{L,T}(void *a, int c, int64_t n) =
+    (c == GB_INT32_code  ?
+        (\forall int64_t k; 0 <= k < n ==>
+            \at(((int32_t*)a)[k],L) == \at(((int32_t*)a)[k],T))
+        : \false
+    ) ;
+ 
+ predicate array_cast{L,T}(void *c, void *a, int c1, int c2, int64_t n) =
+    (c1 == c2 == GB_INT32_code  ?
+        (\forall int64_t k; 0 <= k < n ==>
+            \at(((int32_t*)c)[k],L) == \at(((int32_t*)a)[k],T))
+        : \false
+    ) ;
+ */
+
+/*
+ predicate array_unchanged{L,T}(void *a, int c, int64_t n) =
     (c == GB_BOOL_code   ?
         (\forall int64_t k; 0 <= k < n ==>
             \at(((bool*)a)[k],L) == \at(((bool*)a)[k],T))         :

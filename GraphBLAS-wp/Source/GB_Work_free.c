@@ -16,6 +16,8 @@
 /*@
  requires GB_thread_local.Work == \null || \freeable(GB_thread_local.Work) ;
  
+ frees GB_thread_local.Work ;
+ 
  assigns __fc_heap_status ;
  assigns GB_thread_local.Work_size ;
  assigns GB_thread_local.Work ;
@@ -25,12 +27,10 @@
  
  behavior work_null :
     assumes GB_thread_local.Work == \null ;
-    frees \nothing ;
     ensures \true ;
  
  behavior work_not_null :
     assumes GB_thread_local.Work != \null ;
-    frees GB_thread_local.Work ;
     ensures \allocable(GB_thread_local.Work) ;
  
  complete behaviors ;

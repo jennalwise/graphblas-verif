@@ -21,9 +21,10 @@
 #include "annotlib.h" // for common predicates & logic functions
 
 /*@
+ assigns *((((char*)C) + (0..type_size((int)code1)-1)) + (0..n-1)) ;
+ 
  behavior n_zero :
     assumes n == 0 ;
-    assigns \nothing ;
     ensures n == 0 ;
  
  behavior n_not_zero :
@@ -38,8 +39,6 @@
     requires (!\separated((((char*)C) + (0..type_size((int)code1)-1)) + (0..n-1),
                           (((char*)A) + (0..type_size((int)code2)-1)) + (0..n-1)) ==>
                 code1 == code2) ;
- 
-    assigns *((((char*)C) + (0..type_size((int)code1)-1)) + (0..n-1)) ;
  
     ensures array_unchanged{Pre,Here}(A,(int)code2,n) ;
     ensures array_cast{Here,Pre}(C,A,(int)code1,(int)code2,n) ;

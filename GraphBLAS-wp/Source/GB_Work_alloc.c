@@ -14,13 +14,14 @@
 #include "annotlib.h" // for common predicates & logic functions
 
 /*@
+ frees GB_thread_local.Work ;
+ allocates GB_thread_local.Work ;
+ assigns __fc_heap_status ;
+ assigns GB_thread_local.Work ;
+ assigns GB_thread_local.Work_size ;
+ 
  behavior inputs_invalid :
     assumes plus_mult_overflow(Work_nitems_required,Work_itemsize) ;
- 
-    frees \nothing ;
-    allocates \nothing ;
-    assigns \nothing ;
- 
     ensures \result == \false ;
  
  behavior inputs_valid_no_malloc :
@@ -33,10 +34,6 @@
                 \valid(((char*)GB_thread_local.Work) + (0..GB_thread_local.Work_size-1)) &&
                 \block_length(GB_thread_local.Work) == GB_thread_local.Work_size) ;
  
-    frees \nothing ;
-    allocates \nothing ;
-    assigns \nothing ;
- 
     ensures \result == \true ;
  
  behavior inputs_valid_malloc :
@@ -44,12 +41,6 @@
     assumes (size_t)(Work_nitems_required * Work_itemsize) > GB_thread_local.Work_size ;
  
     requires (GB_thread_local.Work == \null || \freeable(GB_thread_local.Work)) ;
- 
-    frees GB_thread_local.Work ;
-    allocates GB_thread_local.Work ;
-    assigns __fc_heap_status ;
-    assigns GB_thread_local.Work ;
-    assigns GB_thread_local.Work_size ;
  
     ensures (\result == \true || \result == \false) ;
     ensures (\result == \false ==>
