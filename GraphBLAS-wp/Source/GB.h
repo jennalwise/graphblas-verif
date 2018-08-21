@@ -13,6 +13,7 @@
 // Changed NAN to nan("") in FMIN and FMAX since NAN is not supported by Frama-C's math.h file
 // Added isnan macro definition to end of this file following the IEEE 754 Standard -- Frama-C doesn't have
 // isnan in math.h
+
 // *** JENNA CHANGE 6/25/18 ***
 // Rewrote IS_INTEGER, IS_FLOAT, PLUS_INF, MINUS_INF to remove the use of _Generic
 // Removed dependence on FP built-ins used in CAST macro definition
