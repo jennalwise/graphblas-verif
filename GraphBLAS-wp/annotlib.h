@@ -22,6 +22,8 @@
 //------------------------------------------------------------------------------
 
 /*@
+ logic size_t max{L}(size_t a, size_t b) = a > b ? a : b ;
+ 
  predicate magic_valid(int64_t magic) = magic == 0x00981B0787374E72 ;
  
  predicate plus_mult_overflow{L}(size_t a, size_t b) =
@@ -29,7 +31,7 @@
     (a != 0 && b != 0 && b > SIZE_MAX / 2) ||
     (0 < a <= SIZE_MAX / 2 &&
      0 < b <= SIZE_MAX / 2 &&
-     (a + b) > (SIZE_MAX / \min(a,b))) ;
+     (a + b) > (SIZE_MAX / (a < b ? a : b))) ;
  
  predicate array_unchanged{L,T}(void *a, int c, int64_t n) =
     (c == GB_INT32_code  ?
@@ -1072,7 +1074,7 @@
             )
          &&
          tuple_indices_sorted :
-            (m->sorted_pending == \true ?
+            (m->sorted_pending == 1 ?
                 (\forall int64_t k; 0 <= k < m->npending-1 ==>
                     ((matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k])) <
                         (matrix_ncols(m) <= 1 ? 0 : ((m->jpending)[k+1]))
@@ -1108,7 +1110,7 @@
     \valid(m->p + (0..(matrix_ncols(m)+1)-1))
     &&
     (matrix_nvals(m) == 0 ?
-        (m->x != \null || m->i != \null || m->i_shallow || m->x_shallow ?
+        (m->x != \null || m->i != \null || m->i_shallow == 1 || m->x_shallow == 1 ?
             \false :
             (col_ptrs_valid :
                 \forall int64_t j; 0 <= j < matrix_ncols(m) ==> (m->p)[j] == 0
@@ -1134,32 +1136,101 @@
     &&
     pending_tuples_valid(m)
     &&
-    (m->enqueued == \false ?
+    (m->enqueued == 0 ?
         (m->queue_next == \null &&
          m->queue_prev == \null
         ) :
         \true
     ) ;
  
+ // call only at end of matrix valid predicate
  predicate matrix_fp_separated{L}(GrB_Matrix m) =
     \separated(m,
                m->type,
-               (((char*)m->p) + (0..sizeof(int64_t)-1)) + (0..(m->ncols+1)-1),
-               (((char*)m->i) + (0..sizeof(int64_t)-1)) + (0..(m->nzmax)-1),
-               ((char*)(m->x + (0..(m->nzmax)-1))) + (0..(m->type->size)-1),
-               (((char*)m->ipending) + (0..sizeof(int64_t)-1)) + (0..(m->max_npending)-1),
-               (((char*)m->jpending) + (0..sizeof(int64_t)-1)) + (0..(m->max_npending)-1),
-               ((char*)(m->xpending + (0..(m->max_npending)-1))) + (0..(m->type->size)-1),
-               m->operator_pending,
-               ((GrB_Matrix)m->queue_next),
-               ((GrB_Matrix)m->queue_prev)) ;
+               m->p + (0..(m->ncols+1)-1),
+               \union((((char*)m->i) +
+                        (0..(m->i == \null ? 0 : sizeof(int64_t))-1) +
+                        (0..(m->i == \null ? 0 : m->nzmax)-1)),
+                      ((char*)(m->x +
+                        (0..(m->x == \null ? 0 : m->nzmax)-1))) +
+                        (0..(m->x == \null ? 0 : m->type->size)-1),
+                      (((char*)m->ipending) +
+                        (0..(m->ipending == \null ? 0 : sizeof(int64_t))-1) +
+                        (0..(m->ipending == \null ? 0 : m->max_npending)-1)),
+                      (((char*)m->jpending) +
+                        (0..(m->jpending == \null ? 0 : sizeof(int64_t))-1) +
+                        (0..(m->jpending == \null ? 0 : m->max_npending)-1)),
+                      ((char*)(m->xpending +
+                        (0..(m->xpending == \null ? 0 : m->max_npending)-1))) +
+                        (0..(m->xpending == \null ? 0 : m->type->size)-1),
+                      m->operator_pending,
+                      ((GrB_Matrix)m->queue_next),
+                      ((GrB_Matrix)m->queue_prev)
+                     )
+              )
+    &&
+    (m->i != \null && m->x != \null ==>
+        \separated(m->i + (0..(m->nzmax)-1),
+                   ((char*)(m->x + (0..(m->nzmax)-1))) + (0..(m->type->size)-1),
+                   \union((((char*)m->ipending) +
+                            (0..(m->ipending == \null ? 0 : sizeof(int64_t))-1) +
+                            (0..(m->ipending == \null ? 0 : m->max_npending)-1)),
+                          (((char*)m->jpending) +
+                            (0..(m->jpending == \null ? 0 : sizeof(int64_t))-1) +
+                            (0..(m->jpending == \null ? 0 : m->max_npending)-1)),
+                          ((char*)(m->xpending +
+                            (0..(m->xpending == \null ? 0 : m->max_npending)-1))) +
+                            (0..(m->xpending == \null ? 0 : m->type->size)-1),
+                          m->operator_pending,
+                          ((GrB_Matrix)m->queue_next),
+                          ((GrB_Matrix)m->queue_prev)
+                         )
+                  )
+    )
+    &&
+    (m->ipending != \null && m->xpending != \null ==>
+        \separated(m->ipending + (0..(m->max_npending)-1),
+                   ((char*)(m->xpending +
+                        (0..(m->max_npending)-1))) +
+                        (0..(m->type->size)-1),
+                   \union((((char*)m->jpending) +
+                            (0..(m->jpending == \null ? 0 : sizeof(int64_t))-1) +
+                            (0..(m->jpending == \null ? 0 : m->max_npending)-1)),
+                          m->operator_pending,
+                          ((GrB_Matrix)m->queue_next),
+                          ((GrB_Matrix)m->queue_prev)
+                         )
+                  )
+    )
+    &&
+    (m->jpending != \null ==>
+        \separated(m->jpending + (0..(m->max_npending)-1),
+                   \union(m->operator_pending,
+                          ((GrB_Matrix)m->queue_next),
+                          ((GrB_Matrix)m->queue_prev)
+                         )
+                  )
+    )
+    &&
+    (m->operator_pending != \null ==>
+        \separated(m->operator_pending,
+                   \union(((GrB_Matrix)m->queue_next),
+                          ((GrB_Matrix)m->queue_prev)
+                         )
+                  )
+    )
+    &&
+    (m->queue_next != \null || m->queue_prev != \null ==>
+        \separated(((GrB_Matrix)m->queue_next),
+                   ((GrB_Matrix)m->queue_prev))
+    ) ;
  
  predicate matrix_malloc_init{L}(GrB_Matrix m) = m->magic == 0x10981B0787374E72 ;
  
  predicate freeable_storage{L}(GrB_Matrix m) =
-    (!(m->p_shallow) && m->p != \null ==> \freeable(m->p)) &&
-    (!(m->i_shallow) && m->i != \null ==> \freeable(m->i)) &&
-    (!(m->x_shallow) && m->x != \null ==> \freeable(m->x)) &&
+    (m->p_shallow == 0 && m->p != \null ==> \freeable(m->p)) &&
+    (m->i_shallow == 0 && m->i != \null ==> \freeable(m->i)) &&
+    (m->x_shallow == 0 && m->x != \null ==> \freeable(m->x)) &&
     (m->ipending != \null ==> \freeable(m->ipending)) &&
     (m->jpending != \null ==> \freeable(m->jpending)) &&
     (m->xpending != \null ==> \freeable(m->xpending)) ;
@@ -1176,11 +1247,11 @@
     matrix_nvals(m) == 0                      &&
     m->i == \null                             &&
     m->x == \null                             &&
-    m->i_shallow == \false                    &&
-    m->x_shallow == \false                    &&
+    m->i_shallow == 0                         &&
+    m->x_shallow == 0                         &&
     m->nzombies == 0                          &&
     pending_tuples_valid(m)                   &&
-    (m->enqueued == \false ?
+    (m->enqueued == 0 ?
         (m->queue_next == \null &&
          m->queue_prev == \null
         ) :
@@ -1195,19 +1266,19 @@
     matrix_nvals(m) == 0         &&
     m->i == \null                &&
     m->x == \null                &&
-    m->p_shallow == \false       &&
-    m->i_shallow == \false       &&
-    m->x_shallow == \false       &&
+    m->p_shallow == 0            &&
+    m->i_shallow == 0            &&
+    m->x_shallow == 0            &&
     m->npending == 0             &&
     m->max_npending == 0         &&
-    m->sorted_pending == \true   &&
+    m->sorted_pending == 1       &&
     m->operator_pending == \null &&
     m->ipending == \null         &&
     m->jpending == \null         &&
     m->xpending == \null         &&
     m->queue_next == \null       &&
     m->queue_prev == \null       &&
-    m->enqueued == \false        &&
+    m->enqueued == 0             &&
     m->nzombies == 0 ;
  */
 

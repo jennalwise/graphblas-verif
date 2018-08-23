@@ -19,8 +19,10 @@
  requires \valid(A) && matrix_init(A) ==> 0 < matrix_nrows(A) <= 1ULL << 60 ;
  
  requires \separated(&GB_thread_local,\union(nrows,A)) ;
- requires \separated(GB_thread_local.where,\union(nrows,A)) ;
- requires \separated(GB_thread_local.file,\union(nrows,A)) ;
+ requires (GB_thread_local.where != \null || nrows != \null) ==>
+            \separated(GB_thread_local.where,nrows) ;
+ requires (GB_thread_local.file != \null || nrows != \null) ==>
+            \separated(GB_thread_local.file,nrows) ;
  
  assigns *nrows ;
  assigns GB_thread_local.where ;

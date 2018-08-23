@@ -72,13 +72,9 @@
     assumes (matrix_init(*A) ||
              matrix_malloc_init(*A)) ;
  
-    requires (*A)->npending >= 0 ;
-    requires (*A)->nzombies >= 0 ;
+    requires (matrix_valid(*A) ||
+              matrix_malloc_valid(*A)) ;
     requires 0 <= matrix_ncols(*A)+1 <= INT64_MAX ;
-    requires matrix_nvals(*A) >= 0 ;
-    requires (*A)->max_npending >= 0 ;
-    requires type_valid(matrix_type(*A)) ;
-    requires matrix_fp_separated(*A) ;
     requires \freeable(*A) ;
     requires freeable_storage(*A) ;
  

@@ -21,25 +21,25 @@
  assigns *c ;
  behavior a_or_b_zero:
     assumes a == 0 || b == 0 ;
-    ensures \result == \true ;
+    ensures \result == 1 ;
     ensures *c == 0 ;
  behavior a_plus_b_not_safe:
     assumes a != 0 ;
     assumes b != 0 ;
     assumes (a > SIZE_MAX / 2 || b > SIZE_MAX / 2) ;
-    ensures \result == \false ;
+    ensures \result == 0 ;
     ensures *c == 0 ;
  behavior a_times_b_overflows:
     assumes 0 < a <= SIZE_MAX / 2 ;
     assumes 0 < b <= SIZE_MAX / 2 ;
-    assumes (a + b) > (SIZE_MAX / \min(a,b)) ;
-    ensures \result == \false ;
+    assumes (a + b) > (SIZE_MAX / (a < b ? a : b)) ;
+    ensures \result == 0 ;
     ensures *c == 0 ;
  behavior a_times_b_computed:
     assumes 0 < a <= SIZE_MAX / 2 ;
     assumes 0 < b <= SIZE_MAX / 2 ;
-    assumes (a + b) <= (SIZE_MAX / \min(a,b)) ;
-    ensures \result == \true ;
+    assumes (a + b) <= (SIZE_MAX / (a < b ? a : b)) ;
+    ensures \result == 1 ;
     ensures *c == (size_t)(a * b) ;
  complete behaviors ;
  disjoint behaviors ;

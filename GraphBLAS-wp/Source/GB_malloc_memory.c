@@ -39,20 +39,20 @@
  assigns \result ;
  
  behavior inputs_invalid:
-    assumes plus_mult_overflow(nitems,size_of_item) ||
-            nitems > ((GrB_Index)(1ULL << 60))      ||
-            size_of_item > ((GrB_Index)(1ULL << 60)) ;
+    assumes plus_mult_overflow(max((size_t)1,nitems),max((size_t)1,size_of_item)) ||
+            max((size_t)1,nitems) > ((GrB_Index)(1ULL << 60))      ||
+            max((size_t)1,size_of_item) > ((GrB_Index)(1ULL << 60)) ;
     ensures \result == \null ;
  
  behavior inputs_valid:
-    assumes !plus_mult_overflow(nitems,size_of_item) ;
-    assumes nitems <= ((GrB_Index)(1ULL << 60)) ;
-    assumes size_of_item <= ((GrB_Index)(1ULL << 60)) ;
+    assumes !plus_mult_overflow(max((size_t)1,nitems),max((size_t)1,size_of_item)) ;
+    assumes max((size_t)1,nitems) <= ((GrB_Index)(1ULL << 60)) ;
+    assumes max((size_t)1,size_of_item) <= ((GrB_Index)(1ULL << 60)) ;
     ensures (\result == \null || \result != \null) ;
     ensures (\result != \null ==>
-                \fresh(\result,nitems * size_of_item)) ;
+                \fresh(\result,max((size_t)1,nitems) * max((size_t)1,size_of_item))) ;
     ensures (\result != \null ==>
-                \valid(((char*)\result) + (0..nitems*size_of_item-1))) ; // fresh not supported by WP or EVA, so need this redundant stmt for rte
+                \valid(((char*)\result) + (0..max((size_t)1,nitems)*max((size_t)1,size_of_item)-1))) ; // fresh not supported by WP or EVA, so need this redundant stmt for rte
  
  complete behaviors ;
  disjoint behaviors ;

@@ -14,11 +14,8 @@
 #include "annotlib.h" // for common predicates & logic functions
 
 /*@
- requires A != \null ;
- requires \valid(A) ;
- requires type_valid(matrix_type(A)) ;
- requires matrix_fp_separated(A) ;
- requires A->max_npending >= 0 ;
+ requires (matrix_valid(A) ||
+           matrix_malloc_valid(A)) ;
  requires (A->ipending != \null ==> \freeable(A->ipending)) ;
  requires (A->jpending != \null ==> \freeable(A->jpending)) ;
  requires (A->xpending != \null ==> \freeable(A->xpending)) ;
@@ -45,10 +42,11 @@
  ensures A->sorted_pending == \true ;
  ensures A->operator_pending == \null ;
  
- behavior matrix_invalid :
-    assumes !matrix_valid(A) ;
-    assumes !matrix_malloc_valid(A) ;
-    ensures \true ;
+ // undefined behavior if not valid matrix
+ //behavior matrix_invalid :
+ //   assumes !matrix_valid(A) ;
+ //   assumes !matrix_malloc_valid(A) ;
+ //   ensures \true ;
  
  behavior matrix_malloc_valid :
     assumes matrix_malloc_valid(A) ;

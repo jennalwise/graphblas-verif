@@ -81,7 +81,7 @@
             matrix_valid(A)) ;
  ensures (\result == GrB_SUCCESS ==>
             (*shallow_cast_handle)->p == A->p                     &&
-            (*shallow_cast_handle)->p_shallow == \true            &&
+            (*shallow_cast_handle)->p_shallow == 1                &&
             matrix_init(*shallow_cast_handle)                     &&
             matrix_type(*shallow_cast_handle) == ctype            &&
             matrix_nrows(*shallow_cast_handle) == matrix_nrows(A) &&
@@ -108,8 +108,8 @@
                 matrix_nvals(*shallow_cast_handle) == 0     &&
                 (*shallow_cast_handle)->i == \null          &&
                 (*shallow_cast_handle)->x == \null          &&
-                (*shallow_cast_handle)->i_shallow == \false &&
-                (*shallow_cast_handle)->x_shallow == \false) ;
+                (*shallow_cast_handle)->i_shallow == 0      &&
+                (*shallow_cast_handle)->x_shallow == 0) ;
  
  behavior matrix_types_same :
     assumes matrix_nvals(A) >= \max(nnz(A),1) ;
@@ -118,8 +118,8 @@
                 matrix_nvals(*shallow_cast_handle) == matrix_nvals(A) &&
                 (*shallow_cast_handle)->i == A->i                     &&
                 (*shallow_cast_handle)->x == A->x                     &&
-                (*shallow_cast_handle)->i_shallow == \true            &&
-                (*shallow_cast_handle)->x_shallow == \true) ;
+                (*shallow_cast_handle)->i_shallow == 1                &&
+                (*shallow_cast_handle)->x_shallow == 1) ;
  
  behavior matrix_types_not_same :
     assumes matrix_nvals(A) >= \max(nnz(A),1) ;
@@ -135,8 +135,8 @@
                                      type_code(matrix_type(*shallow_cast_handle)),
                                      type_code(matrix_type(A)),
                                      nnz(A))                                    &&
-                (*shallow_cast_handle)->i_shallow == \true                      &&
-                (*shallow_cast_handle)->x_shallow == \false) ;
+                (*shallow_cast_handle)->i_shallow == 1                          &&
+                (*shallow_cast_handle)->x_shallow == 0) ;
  
  complete behaviors ;
  disjoint behaviors ;

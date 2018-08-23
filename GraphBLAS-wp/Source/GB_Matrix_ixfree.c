@@ -48,46 +48,46 @@
     assumes A == \null ;
     ensures A == \null ;
  
- behavior matrix_invalid :
-    assumes A != \null ;
-    assumes !matrix_valid(A) ;
-    assumes !matrix_malloc_valid(A) ;
+ // undefined behavior if not valid matrix
+ //behavior matrix_invalid :
+ //   assumes A != \null ;
+ //   assumes !matrix_valid(A) ;
+ //   assumes !matrix_malloc_valid(A) ;
+    
+ //   requires \valid(A) ;
+ //   requires (matrix_init(A) ||
+ //            matrix_malloc_init(A)) ;
+ //   requires A->npending >= 0 ;
+ //   requires A->nzombies >= 0 ;
+ //   requires matrix_nvals(A) >= 0 ;
+ //   requires A->max_npending >= 0 ;
+ //   requires type_valid(matrix_type(A)) ;
+ //   requires (A->i_shallow == 0 && A->i != \null ==> \freeable(A->i)) ;
+ //   requires (A->x_shallow == 0 && A->x != \null ==> \freeable(A->x)) ;
+ //   requires (A->ipending != \null ==> \freeable(A->ipending)) ;
+ //   requires (A->jpending != \null ==> \freeable(A->jpending)) ;
+ //   requires (A->xpending != \null ==> \freeable(A->xpending)) ;
  
-    requires \valid(A) ;
-    requires (matrix_init(A) ||
-             matrix_malloc_init(A)) ;
-    requires A->npending >= 0 ;
-    requires A->nzombies >= 0 ;
-    requires matrix_nvals(A) >= 0 ;
-    requires A->max_npending >= 0 ;
-    requires type_valid(matrix_type(A)) ;
-    requires matrix_fp_separated(A) ;
-    requires (!(A->i_shallow) && A->i != \null ==> \freeable(A->i)) ;
-    requires (!(A->x_shallow) && A->x != \null ==> \freeable(A->x)) ;
-    requires (A->ipending != \null ==> \freeable(A->ipending)) ;
-    requires (A->jpending != \null ==> \freeable(A->jpending)) ;
-    requires (A->xpending != \null ==> \freeable(A->xpending)) ;
+ //   ensures type_valid(matrix_type(A)) ;
  
-    ensures type_valid(matrix_type(A)) ;
+ //   ensures A->i == \null ;
+ //   ensures A->x == \null ;
+ //   ensures A->i_shallow == 0 ;
+ //   ensures A->x_shallow == 0 ;
+ //   ensures A->nzmax == 0 ;
+ //   ensures A->nzombies == 0 ;
  
-    ensures A->i == \null ;
-    ensures A->x == \null ;
-    ensures A->i_shallow == \false ;
-    ensures A->x_shallow == \false ;
-    ensures A->nzmax == 0 ;
-    ensures A->nzombies == 0 ;
+ //   ensures A->ipending == \null ;
+ //   ensures A->jpending == \null ;
+ //   ensures A->xpending == \null ;
+ //   ensures A->npending == 0 ;
+ //   ensures A->max_npending == 0 ;
+ //   ensures A->sorted_pending == \true ;
+ //   ensures A->operator_pending == \null ;
  
-    ensures A->ipending == \null ;
-    ensures A->jpending == \null ;
-    ensures A->xpending == \null ;
-    ensures A->npending == 0 ;
-    ensures A->max_npending == 0 ;
-    ensures A->sorted_pending == \true ;
-    ensures A->operator_pending == \null ;
- 
-    ensures A->queue_prev == \null ;
-    ensures A->queue_next == \null ;
-    ensures A->enqueued == \false ;
+ //   ensures A->queue_prev == \null ;
+ //   ensures A->queue_next == \null ;
+ //   ensures A->enqueued == \false ;
  
  behavior matrix_malloc_valid :
     assumes A != \null ;
@@ -95,8 +95,8 @@
  
     requires A->npending >= 0 ;
     requires A->nzombies >= 0 ;
-    requires (!(A->i_shallow) && A->i != \null ==> \freeable(A->i)) ;
-    requires (!(A->x_shallow) && A->x != \null ==> \freeable(A->x)) ;
+    requires (A->i_shallow == 0 && A->i != \null ==> \freeable(A->i)) ;
+    requires (A->x_shallow == 0 && A->x != \null ==> \freeable(A->x)) ;
     requires (A->ipending != \null ==> \freeable(A->ipending)) ;
     requires (A->jpending != \null ==> \freeable(A->jpending)) ;
     requires (A->xpending != \null ==> \freeable(A->xpending)) ;
@@ -105,8 +105,8 @@
  
     ensures A->i == \null ;
     ensures A->x == \null ;
-    ensures A->i_shallow == \false ;
-    ensures A->x_shallow == \false ;
+    ensures A->i_shallow == 0 ;
+    ensures A->x_shallow == 0 ;
     ensures A->nzmax == 0 ;
     ensures A->nzombies == 0 ;
  
@@ -128,8 +128,8 @@
  
     requires A->npending >= 0 ;
     requires A->nzombies >= 0 ;
-    requires (!(A->i_shallow) && A->i != \null ==> \freeable(A->i)) ;
-    requires (!(A->x_shallow) && A->x != \null ==> \freeable(A->x)) ;
+    requires (A->i_shallow == 0 && A->i != \null ==> \freeable(A->i)) ;
+    requires (A->x_shallow == 0 && A->x != \null ==> \freeable(A->x)) ;
     requires (A->ipending != \null ==> \freeable(A->ipending)) ;
     requires (A->jpending != \null ==> \freeable(A->jpending)) ;
     requires (A->xpending != \null ==> \freeable(A->xpending)) ;
@@ -138,8 +138,8 @@
  
     ensures A->i == \null ;
     ensures A->x == \null ;
-    ensures A->i_shallow == \false ;
-    ensures A->x_shallow == \false ;
+    ensures A->i_shallow == 0 ;
+    ensures A->x_shallow == 0 ;
     ensures A->nzmax == 0 ;
     ensures A->nzombies == 0 ;
  

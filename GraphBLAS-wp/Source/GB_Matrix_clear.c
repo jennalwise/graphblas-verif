@@ -24,7 +24,7 @@
 /*@
  requires \valid(A) ;
  requires (matrix_valid(A) || matrix_malloc_valid(A)) ;
- requires !(A->p_shallow) ;
+ requires A->p_shallow == 0 ;
  requires A->npending >= 0 ;
  requires A->nzombies >= 0 ;
  requires freeable_storage(A) ;

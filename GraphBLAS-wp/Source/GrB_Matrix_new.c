@@ -22,43 +22,46 @@
  requires type != \null ==> type_valid(type) ;
  
  requires \separated(&GB_thread_local,\union(A,type)) ;
- requires \separated(GB_thread_local.where,\union(A,type)) ;
- requires \separated(GB_thread_local.file,\union(A,type)) ;
- requires \separated(A,type) ;
+ requires (GB_thread_local.where != \null || A != \null) ==>
+            \separated(GB_thread_local.where,A) ;
+ requires (GB_thread_local.file != \null || A != \null) ==>
+            \separated(GB_thread_local.file,A) ;
+ requires (A != \null || type != \null) ==>
+            \separated(A,type) ;
  
  allocates *A ;
  allocates \at((*A),Post)->p ;
  
- assigns __fc_heap_status ;
+ //assigns __fc_heap_status ;
  
- assigns GB_thread_local.where ;
- assigns GB_thread_local.file ;
- assigns GB_thread_local.line ;
- assigns GB_thread_local.info ;
+ //assigns GB_thread_local.where ;
+ //assigns GB_thread_local.file ;
+ //assigns GB_thread_local.line ;
+ //assigns GB_thread_local.info ;
  
- assigns *A ;
- assigns \at((*A),Post)->magic ;
- assigns \at((*A),Post)->type ;
- assigns \at((*A),Post)->nrows ;
- assigns \at((*A),Post)->ncols ;
- assigns \at((*A),Post)->nzmax ;
- assigns \at((*A),Post)->p ;
- assigns \at((*A),Post)->i ;
- assigns \at((*A),Post)->x ;
- assigns \at((*A),Post)->p_shallow ;
- assigns \at((*A),Post)->i_shallow ;
- assigns \at((*A),Post)->x_shallow ;
- assigns \at((*A),Post)->npending ;
- assigns \at((*A),Post)->max_npending ;
- assigns \at((*A),Post)->sorted_pending ;
- assigns \at((*A),Post)->operator_pending ;
- assigns \at((*A),Post)->ipending ;
- assigns \at((*A),Post)->jpending ;
- assigns \at((*A),Post)->xpending ;
- assigns \at((*A),Post)->queue_next ;
- assigns \at((*A),Post)->queue_prev ;
- assigns \at((*A),Post)->enqueued ;
- assigns \at((*A),Post)->nzombies ;
+ //assigns *A ;
+ //assigns \at((*A),Post)->magic ;
+ //assigns \at((*A),Post)->type ;
+ //assigns \at((*A),Post)->nrows ;
+ //assigns \at((*A),Post)->ncols ;
+ //assigns \at((*A),Post)->nzmax ;
+ //assigns \at((*A),Post)->p ;
+ //assigns \at((*A),Post)->i ;
+ //assigns \at((*A),Post)->x ;
+ //assigns \at((*A),Post)->p_shallow ;
+ //assigns \at((*A),Post)->i_shallow ;
+ //assigns \at((*A),Post)->x_shallow ;
+ //assigns \at((*A),Post)->npending ;
+ //assigns \at((*A),Post)->max_npending ;
+ //assigns \at((*A),Post)->sorted_pending ;
+ //assigns \at((*A),Post)->operator_pending ;
+ //assigns \at((*A),Post)->ipending ;
+ //assigns \at((*A),Post)->jpending ;
+ //assigns \at((*A),Post)->xpending ;
+ //assigns \at((*A),Post)->queue_next ;
+ //assigns \at((*A),Post)->queue_prev ;
+ //assigns \at((*A),Post)->enqueued ;
+ //assigns \at((*A),Post)->nzombies ;
  
  behavior matrix_handle_null :
     assumes A == \null ;

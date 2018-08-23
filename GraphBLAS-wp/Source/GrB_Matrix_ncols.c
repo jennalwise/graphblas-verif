@@ -18,8 +18,10 @@
  requires A != \null ==> \valid(A) ;
  
  requires \separated(&GB_thread_local,\union(ncols,A)) ;
- requires \separated(GB_thread_local.where,\union(ncols,A)) ;
- requires \separated(GB_thread_local.file,\union(ncols,A)) ;
+ requires (GB_thread_local.where != \null || ncols != \null) ==>
+            \separated(GB_thread_local.where,ncols) ;
+ requires (GB_thread_local.file != \null || ncols != \null) ==>
+            \separated(GB_thread_local.file,ncols) ;
  
  assigns *ncols ;
  assigns GB_thread_local.where ;
