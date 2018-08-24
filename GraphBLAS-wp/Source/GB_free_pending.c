@@ -39,7 +39,7 @@
  ensures A->xpending == \null ;
  ensures A->npending == 0 ;
  ensures A->max_npending == 0 ;
- ensures A->sorted_pending == \true ;
+ ensures A->sorted_pending == 1 ;
  ensures A->operator_pending == \null ;
  
  // undefined behavior if not valid matrix

@@ -82,12 +82,12 @@
  //   ensures A->xpending == \null ;
  //   ensures A->npending == 0 ;
  //   ensures A->max_npending == 0 ;
- //   ensures A->sorted_pending == \true ;
+ //   ensures A->sorted_pending == 1 ;
  //   ensures A->operator_pending == \null ;
  
  //   ensures A->queue_prev == \null ;
  //   ensures A->queue_next == \null ;
- //   ensures A->enqueued == \false ;
+ //   ensures A->enqueued == 0 ;
  
  behavior matrix_malloc_valid :
     assumes A != \null ;
@@ -115,12 +115,12 @@
     ensures A->xpending == \null ;
     ensures A->npending == 0 ;
     ensures A->max_npending == 0 ;
-    ensures A->sorted_pending == \true ;
+    ensures A->sorted_pending == 1 ;
     ensures A->operator_pending == \null ;
  
     ensures A->queue_prev == \null ;
     ensures A->queue_next == \null ;
-    ensures A->enqueued == \false ;
+    ensures A->enqueued == 0 ;
  
  behavior matrix_valid :
     assumes A != \null ;
@@ -148,14 +148,14 @@
     ensures A->xpending == \null ;
     ensures A->npending == 0 ;
     ensures A->max_npending == 0 ;
-    ensures A->sorted_pending == \true ;
+    ensures A->sorted_pending == 1 ;
     ensures A->operator_pending == \null ;
  
     ensures A->queue_prev == \null ;
     ensures A->queue_next == \null ;
-    ensures A->enqueued == \false ;
+    ensures A->enqueued == 0 ;
  
- complete behaviors ;
+ //complete behaviors ;
  disjoint behaviors ;
  */
 void GB_Matrix_ixfree       // free all but A->p

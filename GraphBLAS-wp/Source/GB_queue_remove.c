@@ -87,7 +87,7 @@
  
  ensures A->queue_prev == \null ;
  ensures A->queue_next == \null ;
- ensures A->enqueued == \false ;
+ ensures A->enqueued == 0 ;
  
  behavior matrix_invalid :
     assumes !matrix_valid(A) ;

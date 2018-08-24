@@ -5,6 +5,11 @@
 // SuiteSparse:GraphBLAS, Timothy A. Davis, (c) 2017-2018, All Rights Reserved.
 // http://suitesparse.com   See GraphBLAS/Doc/License.txt for license.
 
+// *** JENNA Changed 8/23/18 ***
+// Moved GB_Matrix_ixfree (A) ; to above freeing p and setting magic to freed,
+// because want to adhere to specification should probably change specification
+// rather than change this, but it would be a rather large change
+
 // *** JENNA ANNOTATION 7/29/18 ***
 // GB_Matrix_free
 
@@ -83,7 +88,6 @@
     requires freeable_storage(*matrix) ;
  
     ensures *matrix == \null ;
-    ensures type_valid(matrix_type(\old(*matrix))) ;
  
  disjoint behaviors ;
  */
@@ -98,13 +102,14 @@ void GB_Matrix_free             // free a matrix
         GrB_Matrix A = *matrix ;
         if (A != NULL && (A->magic == MAGIC || A->magic == MAGIC2))
         {
+            GB_Matrix_ixfree (A) ;
             A->magic = FREED ;      // to help detect dangling pointers
             if (!A->p_shallow)
             {
                 GB_FREE_MEMORY (A->p, A->ncols+1, sizeof (int64_t)) ;
             }
             A->p = NULL ;
-            GB_Matrix_ixfree (A) ;
+            
             GB_FREE_MEMORY (*matrix, 1, sizeof (struct GB_Matrix_opaque)) ;
         }
         (*matrix) = NULL ;

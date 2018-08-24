@@ -79,8 +79,7 @@
     requires freeable_storage(*A) ;
  
     ensures \result == GrB_SUCCESS ==>
-                *A == \null &&
-                type_valid(matrix_type(\old(*A))) ;
+                *A == \null ;
  
  disjoint behaviors ;
  */
