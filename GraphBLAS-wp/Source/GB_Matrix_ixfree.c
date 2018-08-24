@@ -5,6 +5,11 @@
 // SuiteSparse:GraphBLAS, Timothy A. Davis, (c) 2017-2018, All Rights Reserved.
 // http://suitesparse.com   See GraphBLAS/Doc/License.txt for license.
 
+// *** JENNA CHANGE 8/24/18 ***
+// moved calls to free_pending and queue_remove to before freeing of stuff
+// for verification correctness; should move back when remove dependency on
+// valid matrices
+
 // *** JENNA ANNOTATION 7/28/18 ***
 // GB_Matrix_ixfree
 
@@ -14,9 +19,15 @@
 #include "annotlib.h" // for common predicates & logic functions
 
 /*@
- requires A != \null ==>
-                \valid(A) &&
-                type_valid(matrix_type(A)) ;
+ requires (A != \null ==>
+            (matrix_valid(A) || matrix_malloc_valid(A))) ;
+ requires (A != \null ==>
+            (A->i_shallow == 0 && A->i != \null ==> \freeable(A->i)) &&
+            (A->x_shallow == 0 && A->x != \null ==> \freeable(A->x)) &&
+            (A->ipending != \null ==> \freeable(A->ipending)) &&
+            (A->jpending != \null ==> \freeable(A->jpending)) &&
+            (A->xpending != \null ==> \freeable(A->xpending))) ;
+ 
  frees A->i ;
  frees A->x ;
  frees A->ipending ;
@@ -134,8 +145,6 @@
     requires (A->jpending != \null ==> \freeable(A->jpending)) ;
     requires (A->xpending != \null ==> \freeable(A->xpending)) ;
  
-    ensures matrix_valid(A) ;
- 
     ensures A->i == \null ;
     ensures A->x == \null ;
     ensures A->i_shallow == 0 ;
@@ -155,7 +164,7 @@
     ensures A->queue_next == \null ;
     ensures A->enqueued == 0 ;
  
- //complete behaviors ;
+ complete behaviors ;
  disjoint behaviors ;
  */
 void GB_Matrix_ixfree       // free all but A->p
@@ -181,6 +190,12 @@ void GB_Matrix_ixfree       // free all but A->p
     ASSERT (PENDING_OK (A)) ;
     ASSERT (ZOMBIES_OK (A)) ;
 
+    // free pending tuples
+    GB_free_pending (A) ;
+    
+    // remove from the queue, if present
+    GB_queue_remove (A) ;
+    
     // free A->i unless it is shallow
     if (!A->i_shallow)
     {
@@ -201,11 +216,5 @@ void GB_Matrix_ixfree       // free all but A->p
 
     // no zombies remain
     A->nzombies = 0 ;
-
-    // free pending tuples
-    GB_free_pending (A) ;
-
-    // remove from the queue, if present
-    GB_queue_remove (A) ;
 }
 

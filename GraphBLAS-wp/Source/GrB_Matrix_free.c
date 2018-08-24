@@ -17,6 +17,17 @@
 #include "annotlib.h" // for common predicates & logic functions
 
 /*@
+ requires (A != \null ==> \valid(A)) ;
+ requires (\valid(A) && *A != \null ==> \valid(*A)) ;
+ requires (\valid(A) && \valid(*A) &&
+            (matrix_init(*A) || matrix_malloc_init(*A)) ==>
+                (matrix_valid(*A) || matrix_malloc_valid(*A)) &&
+                0 <= matrix_ncols(*A)+1 <= INT64_MAX &&
+                freeable_storage(*A)) ;
+ requires (\valid(A) && \valid(*A) &&
+            (matrix_init(*A) || matrix_malloc_init(*A)) ==>
+                \freeable(*A)) ;
+ 
  frees *A ;
  frees (*A)->p ;
  frees (*A)->i ;

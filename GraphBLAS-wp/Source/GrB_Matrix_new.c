@@ -26,8 +26,8 @@
             \separated(GB_thread_local.where,A) ;
  requires (GB_thread_local.file != \null || A != \null) ==>
             \separated(GB_thread_local.file,A) ;
- requires (A != \null || type != \null) ==>
-            \separated(A,type) ;
+ requires ((A != \null || type != \null) ==>
+            \separated(A,type)) ;
  
  allocates *A ;
  allocates \at((*A),Post)->p ;

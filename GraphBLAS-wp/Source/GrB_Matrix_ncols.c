@@ -14,8 +14,8 @@
 #include "annotlib.h" // for common predicates & logic functions
 
 /*@
- requires ncols != \null ==> \valid(ncols) ;
- requires A != \null ==> \valid(A) ;
+ requires (ncols != \null ==> \valid(ncols)) ;
+ requires (A != \null ==> \valid(A)) ;
  
  requires \separated(&GB_thread_local,\union(ncols,A)) ;
  requires (GB_thread_local.where != \null || ncols != \null) ==>

@@ -26,8 +26,12 @@
  requires (\valid(matrix) && *matrix != \null ==> \valid(*matrix)) ;
  requires (\valid(matrix) && \valid(*matrix) &&
            (matrix_init(*matrix) || matrix_malloc_init(*matrix)) ==>
-                type_valid(matrix_type(*matrix)) &&
-                0 <= matrix_ncols(*matrix)+1 <= INT64_MAX) ;
+                (matrix_valid(*matrix) || matrix_malloc_valid(*matrix)) &&
+                0 <= matrix_ncols(*matrix)+1 <= INT64_MAX &&
+                freeable_storage(*matrix)) ;
+ requires (\valid(matrix) && \valid(*matrix) &&
+            (matrix_init(*matrix) || matrix_malloc_init(*matrix)) ==>
+                \freeable(*matrix)) ;
  
  frees *matrix ;
  frees (*matrix)->p ;

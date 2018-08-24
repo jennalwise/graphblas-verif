@@ -14,9 +14,9 @@
 #include "annotlib.h" // for common predicates & logic functions
 
 /*@
- requires nrows != \null ==> \valid(nrows) ;
- requires A != \null ==> \valid(A) ;
- requires \valid(A) && matrix_init(A) ==> 0 < matrix_nrows(A) <= 1ULL << 60 ;
+ requires (nrows != \null ==> \valid(nrows)) ;
+ requires (A != \null ==> \valid(A)) ;
+ requires (\valid(A) && matrix_init(A) ==> 0 < matrix_nrows(A) <= 1ULL << 60) ;
  
  requires \separated(&GB_thread_local,\union(nrows,A)) ;
  requires (GB_thread_local.where != \null || nrows != \null) ==>

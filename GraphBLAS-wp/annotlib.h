@@ -1064,8 +1064,7 @@
          &&
          \valid(m->jpending + (0..(m->max_npending)-1))
          &&
-         \valid(((char*)(m->xpending + (0..(m->max_npending)-1))) +
-            (0..type_size(matrix_type(m))-1))
+         \valid(((char*)(m->xpending)) + (0..((m->max_npending)*type_size(matrix_type(m)))-1))
          &&
          tuple_indices_in_bounds :
             (\forall int64_t k; 0 <= k < m->npending ==>
@@ -1125,8 +1124,7 @@
                     (m->p)[j] <= (m->p)[j+1] <= matrix_nvals(m)
                 )
             &&
-            \valid(((char*)(m->x + (0..(matrix_nvals(m))-1))) +
-                (0..type_size(matrix_type(m))-1))
+            \valid(((char*)(m->x)) + (0..(matrix_nvals(m)*type_size(matrix_type(m)))-1))
             &&
             row_indices_valid(m)
         )
@@ -1148,21 +1146,16 @@
     \separated(m,
                m->type,
                m->p + (0..(m->ncols+1)-1),
-               \union((((char*)m->i) +
-                        (0..(m->i == \null ? 0 : sizeof(int64_t))-1) +
-                        (0..(m->i == \null ? 0 : m->nzmax)-1)),
-                      ((char*)(m->x +
-                        (0..(m->x == \null ? 0 : m->nzmax)-1))) +
-                        (0..(m->x == \null ? 0 : m->type->size)-1),
-                      (((char*)m->ipending) +
-                        (0..(m->ipending == \null ? 0 : sizeof(int64_t))-1) +
-                        (0..(m->ipending == \null ? 0 : m->max_npending)-1)),
-                      (((char*)m->jpending) +
-                        (0..(m->jpending == \null ? 0 : sizeof(int64_t))-1) +
-                        (0..(m->jpending == \null ? 0 : m->max_npending)-1)),
-                      ((char*)(m->xpending +
-                        (0..(m->xpending == \null ? 0 : m->max_npending)-1))) +
-                        (0..(m->xpending == \null ? 0 : m->type->size)-1),
+               \union(((char*)(m->i)) +
+                        (0..(m->i == \null ? 0 : (m->nzmax)*sizeof(int64_t))-1),
+                      ((char*)(m->x)) +
+                        (0..(m->x == \null ? 0 : (m->nzmax)*(m->type->size))-1),
+                      ((char*)(m->ipending)) +
+                        (0..(m->ipending == \null ? 0 : (m->max_npending)*sizeof(int64_t))-1),
+                      ((char*)(m->jpending)) +
+                        (0..(m->jpending == \null ? 0 : (m->max_npending)*sizeof(int64_t))-1),
+                      ((char*)(m->xpending)) +
+                        (0..(m->xpending == \null ? 0 : (m->max_npending)*(m->type->size))-1),
                       m->operator_pending,
                       ((GrB_Matrix)m->queue_next),
                       ((GrB_Matrix)m->queue_prev)
@@ -1171,16 +1164,13 @@
     &&
     (m->i != \null && m->x != \null ==>
         \separated(m->i + (0..(m->nzmax)-1),
-                   ((char*)(m->x + (0..(m->nzmax)-1))) + (0..(m->type->size)-1),
-                   \union((((char*)m->ipending) +
-                            (0..(m->ipending == \null ? 0 : sizeof(int64_t))-1) +
-                            (0..(m->ipending == \null ? 0 : m->max_npending)-1)),
-                          (((char*)m->jpending) +
-                            (0..(m->jpending == \null ? 0 : sizeof(int64_t))-1) +
-                            (0..(m->jpending == \null ? 0 : m->max_npending)-1)),
-                          ((char*)(m->xpending +
-                            (0..(m->xpending == \null ? 0 : m->max_npending)-1))) +
-                            (0..(m->xpending == \null ? 0 : m->type->size)-1),
+                   ((char*)(m->x)) + (0..((m->nzmax)*(m->type->size))-1),
+                   \union(((char*)(m->ipending)) +
+                            (0..(m->ipending == \null ? 0 : (m->max_npending)*sizeof(int64_t))-1),
+                          ((char*)(m->jpending)) +
+                            (0..(m->jpending == \null ? 0 : (m->max_npending)*sizeof(int64_t))-1),
+                          ((char*)(m->xpending)) +
+                            (0..(m->xpending == \null ? 0 : (m->max_npending)*(m->type->size))-1),
                           m->operator_pending,
                           ((GrB_Matrix)m->queue_next),
                           ((GrB_Matrix)m->queue_prev)
@@ -1190,12 +1180,9 @@
     &&
     (m->ipending != \null && m->xpending != \null ==>
         \separated(m->ipending + (0..(m->max_npending)-1),
-                   ((char*)(m->xpending +
-                        (0..(m->max_npending)-1))) +
-                        (0..(m->type->size)-1),
-                   \union((((char*)m->jpending) +
-                            (0..(m->jpending == \null ? 0 : sizeof(int64_t))-1) +
-                            (0..(m->jpending == \null ? 0 : m->max_npending)-1)),
+                   ((char*)(m->xpending)) + (0..((m->max_npending)*(m->type->size))-1),
+                   \union(((char*)(m->jpending)) +
+                            (0..(m->jpending == \null ? 0 : (m->max_npending)*sizeof(int64_t))-1),
                           m->operator_pending,
                           ((GrB_Matrix)m->queue_next),
                           ((GrB_Matrix)m->queue_prev)

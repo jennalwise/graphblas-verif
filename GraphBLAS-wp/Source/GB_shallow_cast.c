@@ -88,14 +88,14 @@
             matrix_ncols(*shallow_cast_handle) == matrix_ncols(A) &&
             (*shallow_cast_handle)->npending == 0                 &&
             (*shallow_cast_handle)->max_npending == 0             &&
-            (*shallow_cast_handle)->sorted_pending == \true       &&
+            (*shallow_cast_handle)->sorted_pending == 1           &&
             (*shallow_cast_handle)->operator_pending == \null     &&
             (*shallow_cast_handle)->ipending == \null             &&
             (*shallow_cast_handle)->jpending == \null             &&
             (*shallow_cast_handle)->xpending == \null             &&
             (*shallow_cast_handle)->queue_next == \null           &&
             (*shallow_cast_handle)->queue_prev == \null           &&
-            (*shallow_cast_handle)->enqueued == \false            &&
+            (*shallow_cast_handle)->enqueued == 0                 &&
             (*shallow_cast_handle)->nzombies == 0                 &&
             matrix_valid(*shallow_cast_handle)                    &&
             \freeable(*shallow_cast_handle)                       &&
@@ -112,7 +112,7 @@
                 (*shallow_cast_handle)->x_shallow == 0) ;
  
  behavior matrix_types_same :
-    assumes matrix_nvals(A) >= \max(nnz(A),1) ;
+    assumes matrix_nvals(A) >= max(nnz(A),1) ;
     assumes ctype == matrix_type(A) ;
     ensures (\result == GrB_SUCCESS ==>
                 matrix_nvals(*shallow_cast_handle) == matrix_nvals(A) &&
@@ -122,10 +122,10 @@
                 (*shallow_cast_handle)->x_shallow == 1) ;
  
  behavior matrix_types_not_same :
-    assumes matrix_nvals(A) >= \max(nnz(A),1) ;
+    assumes matrix_nvals(A) >= max(nnz(A),1) ;
     assumes ctype != matrix_type(A) ;
     ensures (\result == GrB_SUCCESS ==>
-                matrix_nvals(*shallow_cast_handle) == (int64_t)\max(nnz(A),1)   &&
+                matrix_nvals(*shallow_cast_handle) == (int64_t)max(nnz(A),1)   &&
                 (*shallow_cast_handle)->i == A->i                               &&
                 array_unchanged{Pre,Here}(A->x,
                                           type_code(matrix_type(A)),

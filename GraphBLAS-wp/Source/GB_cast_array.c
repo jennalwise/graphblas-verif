@@ -31,8 +31,9 @@
     assumes n != 0 ;
  
     requires n > 0 ;
-    requires code1 < GB_UDT_code ;
-    requires code2 < GB_UDT_code ;
+    //requires code1 == code2 == GB_INT32_code ; // to make verification simpler
+    requires GB_BOOL_code <= code1 < GB_UDT_code ;
+    requires GB_BOOL_code <= code2 < GB_UDT_code ;
     requires type_code_compatible{Here,Here}((int)code1,(int)code2) ;
     requires \valid((((char*)C) + (0..type_size((int)code1)-1)) + (0..n-1)) ;
     requires \valid((((char*)A) + (0..type_size((int)code2)-1)) + (0..n-1)) ;
