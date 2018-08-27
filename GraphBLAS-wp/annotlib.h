@@ -1011,12 +1011,18 @@
  logic set<char*> matrix_fp{L}(GrB_Matrix m) =
     \union(m,
            m->type,
-           (((char*)m->p) + (0..sizeof(int64_t)-1)) + (0..(m->ncols+1)-1),
-           (((char*)m->i) + (0..sizeof(int64_t)-1)) + (0..(m->nzmax)-1),
-           ((char*)(m->x + (0..(m->nzmax)-1))) + (0..(m->type->size)-1),
-           (((char*)m->ipending) + (0..sizeof(int64_t)-1)) + (0..(m->max_npending)-1),
-           (((char*)m->jpending) + (0..sizeof(int64_t)-1)) + (0..(m->max_npending)-1),
-           ((char*)(m->xpending + (0..(m->max_npending)-1))) + (0..(m->type->size)-1),
+           ((char*)(m->p)) +
+           	   (0..(m->p == \null ? 0 : (m->ncols+1)*sizeof(int64_t))-1),
+           ((char*)(m->i)) +
+               (0..(m->i == \null ? 0 : (m->nzmax)*sizeof(int64_t))-1),
+           ((char*)(m->x)) +
+               (0..(m->x == \null ? 0 : (m->nzmax)*(m->type->size))-1),
+           ((char*)(m->ipending)) +
+               (0..(m->ipending == \null ? 0 : (m->max_npending)*sizeof(int64_t))-1),
+           ((char*)(m->jpending)) +
+               (0..(m->jpending == \null ? 0 : (m->max_npending)*sizeof(int64_t))-1),
+           ((char*)(m->xpending)) +
+               (0..(m->xpending == \null ? 0 : (m->max_npending)*(m->type->size))-1),
            m->operator_pending,
            ((GrB_Matrix)m->queue_next),
            ((GrB_Matrix)m->queue_prev)) ;
@@ -1141,12 +1147,13 @@
         \true
     ) ;
  
- // call only at end of matrix valid predicate
+ // assumes m and m->type are non-null
  predicate matrix_fp_separated{L}(GrB_Matrix m) =
-    \separated(m,
+ 	\separated(m,
                m->type,
-               m->p + (0..(m->ncols+1)-1),
-               \union(((char*)(m->i)) +
+               \union(((char*)(m->p)) +
+                		(0..(m->p == \null ? 0 : (m->ncols+1)*sizeof(int64_t))-1),
+               	   	  ((char*)(m->i)) +
                         (0..(m->i == \null ? 0 : (m->nzmax)*sizeof(int64_t))-1),
                       ((char*)(m->x)) +
                         (0..(m->x == \null ? 0 : (m->nzmax)*(m->type->size))-1),
@@ -1162,9 +1169,44 @@
                      )
               )
     &&
-    (m->i != \null && m->x != \null ==>
+    (m->p != \null ==>
+    	\separated(m->p + (0..(m->ncols+1)-1),
+               	   \union(((char*)(m->i)) +
+                        	(0..(m->i == \null ? 0 : (m->nzmax)*sizeof(int64_t))-1),
+                      	  ((char*)(m->x)) +
+                        	(0..(m->x == \null ? 0 : (m->nzmax)*(m->type->size))-1),
+						  ((char*)(m->ipending)) +
+							(0..(m->ipending == \null ? 0 : (m->max_npending)*sizeof(int64_t))-1),
+						  ((char*)(m->jpending)) +
+							(0..(m->jpending == \null ? 0 : (m->max_npending)*sizeof(int64_t))-1),
+						  ((char*)(m->xpending)) +
+							(0..(m->xpending == \null ? 0 : (m->max_npending)*(m->type->size))-1),
+						  m->operator_pending,
+						  ((GrB_Matrix)m->queue_next),
+						  ((GrB_Matrix)m->queue_prev)
+						 )
+              	  )
+    )
+    &&
+    (m->i != \null ==>
         \separated(m->i + (0..(m->nzmax)-1),
-                   ((char*)(m->x)) + (0..((m->nzmax)*(m->type->size))-1),
+                   \union(((char*)(m->x)) +
+                        	(0..(m->x == \null ? 0 : (m->nzmax)*(m->type->size))-1),
+                   	   	  ((char*)(m->ipending)) +
+                            (0..(m->ipending == \null ? 0 : (m->max_npending)*sizeof(int64_t))-1),
+                          ((char*)(m->jpending)) +
+                            (0..(m->jpending == \null ? 0 : (m->max_npending)*sizeof(int64_t))-1),
+                          ((char*)(m->xpending)) +
+                            (0..(m->xpending == \null ? 0 : (m->max_npending)*(m->type->size))-1),
+                          m->operator_pending,
+                          ((GrB_Matrix)m->queue_next),
+                          ((GrB_Matrix)m->queue_prev)
+                         )
+                  )
+    )
+    &&
+    (m->x != \null ==>
+        \separated(((char*)(m->x)) + (0..((m->nzmax)*(m->type->size))-1),
                    \union(((char*)(m->ipending)) +
                             (0..(m->ipending == \null ? 0 : (m->max_npending)*sizeof(int64_t))-1),
                           ((char*)(m->jpending)) +
@@ -1178,9 +1220,21 @@
                   )
     )
     &&
-    (m->ipending != \null && m->xpending != \null ==>
+    (m->ipending != \null ==>
         \separated(m->ipending + (0..(m->max_npending)-1),
-                   ((char*)(m->xpending)) + (0..((m->max_npending)*(m->type->size))-1),
+                   \union(((char*)(m->jpending)) +
+                            (0..(m->jpending == \null ? 0 : (m->max_npending)*sizeof(int64_t))-1),
+                          ((char*)(m->xpending)) +
+                            (0..(m->xpending == \null ? 0 : (m->max_npending)*(m->type->size))-1),
+                          m->operator_pending,
+                          ((GrB_Matrix)m->queue_next),
+                          ((GrB_Matrix)m->queue_prev)
+                         )
+                  )
+    )
+    &&
+    (m->xpending != \null ==>
+        \separated(((char*)(m->xpending)) + (0..((m->max_npending)*(m->type->size))-1),
                    \union(((char*)(m->jpending)) +
                             (0..(m->jpending == \null ? 0 : (m->max_npending)*sizeof(int64_t))-1),
                           m->operator_pending,
